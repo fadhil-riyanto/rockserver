@@ -23,6 +23,7 @@ void handle_conn(int clientfd) {
             data[ret] = '\0';
 
             printf("client data: %s", data);
+            printf("%d\n", clientfd);
             if (strcmp(data, "exit\n") == 0) {
                 break;
             }

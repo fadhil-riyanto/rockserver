@@ -9,9 +9,11 @@
 
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
+struct server_status server_status;
 
 static void signal_cb(int signo) {
     exit_now = 1;
+    server_status.exit_now = (short *)&exit_now;
 }
 
 void exit_gracefully(int *sockfd) {
