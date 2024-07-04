@@ -18,8 +18,8 @@ int get_free_thread(struct threading_ctx *th) {
     return -1;
 }
 
-void fill_thread(struct threading_ctx *th, int thnum, void (*f)()) {
-    th[thnum].handler = std::thread(f);
+void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int), int acceptfd) {
+    th[thnum].handler = std::thread(f, acceptfd);
     th[thnum].state = 1;
     th[thnum].th_index = thnum;
 }
