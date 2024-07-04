@@ -17,5 +17,8 @@ server: server.cc
 config: config.c
 	gcc $? -o ${OUTDIR}/config.o ${CFLAGS} -c 
 
-all: main threading config server
-	g++ ${OUTDIR}/config.o ${OUTDIR}/main.o ${OUTDIR}/threading.o ${OUTDIR}/server.o -o main
+conn: connection_handler.cc
+	g++ $? -o ${OUTDIR}/connection_handler.o ${CFLAGS} -c 
+
+all: main threading config server conn
+	g++ ${OUTDIR}/config.o ${OUTDIR}/main.o ${OUTDIR}/threading.o ${OUTDIR}/server.o ${OUTDIR}/connection_handler.o -o main
