@@ -9,4 +9,7 @@ struct threading_ctx {
     int th_index;
 };
 
+void init_thread(struct threading_ctx *th);
+int get_free_thread(struct threading_ctx *th);
+
 #endif
