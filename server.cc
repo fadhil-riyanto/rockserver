@@ -54,12 +54,3 @@ void sock_cleanup(int *sockfd) {
     close(*sockfd);
 }
 
-void sock_eventloop(int sigstop) {
-    while (1) {
-        if (sigstop) {
-            break;
-        }
-
-
-    }
-}
