@@ -10,7 +10,7 @@
 int sock_init(int port) {
     int sockfd;
     struct sockaddr_in sa_in;
-    int sockoptval;
+    int sockoptval = 0;
 
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
