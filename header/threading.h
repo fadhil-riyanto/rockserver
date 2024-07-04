@@ -11,5 +11,7 @@ struct threading_ctx {
 
 void init_thread(struct threading_ctx *th);
 int get_free_thread(struct threading_ctx *th);
+void fill_thread(struct threading_ctx *th, int thnum, void (*f)());
+int clean_thread(struct threading_ctx *th);
 
 #endif

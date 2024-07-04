@@ -1,5 +1,6 @@
 #include "header/threading.h"
 #include "config.c"
+#include <thread>
 
 void init_thread(struct threading_ctx *th) {
     for(int i = 0; i < MAX_CONN; i++) {
@@ -14,4 +15,18 @@ int get_free_thread(struct threading_ctx *th) {
             return th[i].th_index;
         }
     }
+    return -1;
+}
+
+void fill_thread(struct threading_ctx *th, int thnum, void (*f)()) {
+    th[thnum].handler = std::thread(f);
+    th[thnum].state = 1;
+    th[thnum].th_index = thnum;
+}
+
+int clean_thread(struct threading_ctx *th) {
+    for(int i = 0; i < MAX_CONN; i++) {
+        th[i].handler.join();
+    }
+    return -1;
 }
