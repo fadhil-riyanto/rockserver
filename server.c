@@ -29,7 +29,7 @@ int sock_init(int port) {
         perror("inet pton");
         goto err;
     }
-    sa_in.sin_port = htons(9880);
+    sa_in.sin_port = htons(port);
     bzero(&sa_in.sin_zero, 8);
 
     if (bind(sockfd, (struct sockaddr*)&sa_in, sizeof(sa_in)) == -1) {
@@ -49,4 +49,8 @@ err:
     return -1;
 
 
+}
+
+void sock_cleanup(int *sockfd) {
+    close(*sockfd);
 }
