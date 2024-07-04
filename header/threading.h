@@ -1,10 +1,13 @@
 #ifndef THREADING_H
 #define THREADING_H
 
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <thread>
 
 struct threading_ctx {
     std::thread handler;
+    struct sockaddr_in clientaddr;
     int state;
     int need_join;
     int th_index;
