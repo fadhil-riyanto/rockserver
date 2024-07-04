@@ -5,12 +5,11 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include "config.c"
 
 int sock_init(int port) {
-    int sockfd, connfd;
+    int sockfd;
     struct sockaddr_in sa_in;
-    struct sockaddr_in sa_client_in;
-    int sin_size;
     int sockoptval;
 
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -37,7 +36,7 @@ int sock_init(int port) {
         goto err;
     }
 
-    if (listen(sockfd, 100) == -1) {
+    if (listen(sockfd, MAX_CONN) == -1) {
         perror("listen");
         goto err;
     }
@@ -53,4 +52,14 @@ err:
 
 void sock_cleanup(int *sockfd) {
     close(*sockfd);
+}
+
+void sock_eventloop(int sigstop) {
+    while (1) {
+        if (sigstop) {
+            break;
+        }
+
+
+    }
 }
