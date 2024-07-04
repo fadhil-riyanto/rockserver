@@ -1,7 +1,10 @@
 #include "header/server.h"
 #include "header/threading.h"
+#include "header/connection_handler.h"
 #include <stdio.h>
 #include <signal.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include "config.c"
 
 volatile sig_atomic_t exit_now = 0;
@@ -16,12 +19,10 @@ void exit_gracefully(int *sockfd) {
     clean_thread(th);
 }
 
-void handle_conn() {
-    printf("handled\n");
-}
-
 void _main() {
     int freethread = 0;
+    int acceptfd = 0;
+
     int sockfd = sock_init(CONF_PORT);
     if (sockfd == -1) {
         fprintf(stderr, "socket error\n");
@@ -41,8 +42,14 @@ void _main() {
             exit_gracefully(&sockfd);
             break;
         } else {
-            // if ((th[freethread].handler))
-            fill_thread(th, freethread, handle_conn);
+            socklen_t socketsize = sizeof(struct sockaddr_in);
+            acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, &socketsize);
+            if (acceptfd == -1) {
+                perror("accept");
+            } else {
+                fill_thread(th, freethread, handle_conn, acceptfd);
+            }
+            
         }
 
         printf("%d\n", freethread);
