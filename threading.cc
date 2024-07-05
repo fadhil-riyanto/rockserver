@@ -22,6 +22,7 @@ void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int), int accept
     th[thnum].handler = std::thread(f, acceptfd);
     th[thnum].state = 1;
     th[thnum].th_index = thnum;
+    th[thnum].acceptfd_handler = acceptfd;
 }
 
 int clean_thread(struct threading_ctx *th) {

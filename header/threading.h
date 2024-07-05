@@ -7,7 +7,11 @@
 
 struct threading_ctx {
     std::thread handler;
+
+    // client section
     struct sockaddr_in clientaddr;
+    int acceptfd_handler;
+
     int state;
     int need_join;
     int th_index;
