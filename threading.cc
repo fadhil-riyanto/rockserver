@@ -27,7 +27,10 @@ void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int), int accept
 
 int clean_thread(struct threading_ctx *th) {
     for(int i = 0; i < MAX_CONN; i++) {
-        th[i].handler.join();
+        if (th[i].state == 1) {
+            th[i].handler.join();
+        }
+        
     }
     return -1;
 }
