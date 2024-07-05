@@ -22,8 +22,9 @@ static void signal_cb(int signo) {
 }
 
 void exit_gracefully(int *sockfd) {
-    sock_cleanup(sockfd);
     clean_thread(th);
+    sock_cleanup(sockfd);
+    
 }
 
 void _main() {
@@ -65,7 +66,15 @@ void _main() {
                 exit_gracefully(&sockfd);
                 break;
             } else {
-                fill_thread(th, freethread, handle_conn, acceptfd);
+                socklen_t socketsize = sizeof(struct sockaddr_in);
+                acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, &socketsize);
+                // if (acceptfd == -1) {
+                //     perror("accept");
+                // } else {
+                //     printf("accepting ...\n");
+                //     fill_thread(th, freethread, handle_conn, acceptfd);
+                // }
+                close(acceptfd);
             }
         }
 
