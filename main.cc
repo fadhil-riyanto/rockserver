@@ -1,6 +1,8 @@
 #include "header/server.h"
 #include "header/threading.h"
 #include "header/connection_handler.h"
+#include "header/epoll_watcher.h"
+#include <cstring>
 #include <stdio.h>
 #include <signal.h>
 #include <sys/socket.h>
@@ -22,8 +24,13 @@ void exit_gracefully(int *sockfd) {
 }
 
 void _main() {
+    int epfd;
     int freethread = 0;
     int acceptfd = 0;
+    short ret;
+    memset(&ret, 0, sizeof(ret));
+
+    ret = epoll_init(&epfd);
 
     int sockfd = sock_init(CONF_PORT);
     if (sockfd == -1) {
