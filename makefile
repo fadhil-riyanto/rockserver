@@ -1,9 +1,12 @@
-CFLAGS := -g -Wall
+CFLAGS := -g -Wall 
 OUT := main
 OUTDIR = build
 
 clean: 
 	rm main
+
+epoll_watcher: epoll_watcher.cc
+	g++ $? -o ${OUTDIR}/epoll_watcher.o ${CFLAGS} -c 
 
 main: main.cc
 	g++ $? -o ${OUTDIR}/main.o ${CFLAGS} -c 
@@ -20,5 +23,5 @@ config: config.c
 conn: connection_handler.cc
 	g++ $? -o ${OUTDIR}/connection_handler.o ${CFLAGS} -c 
 
-all: main threading config server conn
-	g++ ${OUTDIR}/config.o ${OUTDIR}/main.o ${OUTDIR}/threading.o ${OUTDIR}/server.o ${OUTDIR}/connection_handler.o -o main
+all: main threading config server conn epoll_watcher
+	g++ ${OUTDIR}/config.o ${OUTDIR}/main.o ${OUTDIR}/threading.o ${OUTDIR}/server.o ${OUTDIR}/connection_handler.o ${OUTDIR}/epoll_watcher.o -o main
