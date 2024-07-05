@@ -1,6 +1,7 @@
 #include "header/epoll_watcher.h"
 #include <sys/epoll.h>
 #include <stdio.h>
+#include <unistd.h>
 
 int epoll_init(int *epfd) {
     *epfd = epoll_create1(0);
@@ -20,4 +21,8 @@ int epoll_watch(int fd, int epfd, struct epoll_event *event) {
         return -1;
     }
     return 0;
+}
+
+void epoll_cleanup(int epfd) {
+    close(epfd);
 }
