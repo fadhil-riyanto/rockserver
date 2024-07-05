@@ -4,5 +4,6 @@
 #include <sys/epoll.h>
 
 int epoll_init(int *epfd);
+int epoll_watch(int fd, int epfd, struct epoll_event *event);
 
 #endif
