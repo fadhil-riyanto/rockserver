@@ -2,6 +2,8 @@ CFLAGS := -g -Wall
 OUT := main
 OUTDIR = build
 
+LOGC_FLAGS = 
+
 clean: 
 	rm main
 
@@ -23,5 +25,10 @@ config: config.c
 conn: connection_handler.cc
 	g++ $? -o ${OUTDIR}/connection_handler.o ${CFLAGS} -c 
 
-all: main threading config server conn epoll_watcher
-	g++ ${OUTDIR}/config.o ${OUTDIR}/main.o ${OUTDIR}/threading.o ${OUTDIR}/server.o ${OUTDIR}/connection_handler.o ${OUTDIR}/epoll_watcher.o -o main
+logc: submodule/log.c/src/log.c
+	gcc submodule/log.c/src/log.c -o build/logc.o ${LOGC_FLAGS} -c
+
+all: main threading config server conn epoll_watcher logc
+	g++ ${OUTDIR}/config.o ${OUTDIR}/main.o ${OUTDIR}/threading.o ${OUTDIR}/server.o \
+	${OUTDIR}/connection_handler.o ${OUTDIR}/epoll_watcher.o ${OUTDIR}/logc.o \
+	-o main
