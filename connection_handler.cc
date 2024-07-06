@@ -20,13 +20,18 @@ void handle_conn(int clientfd) {
         printf("handled fd %d\n", clientfd);
         while (1) {
             ret = recv(clientfd, data, length, 0);
-            data[ret] = '\0';
-
-            printf("client data: %s", data);
-            printf("%d\n", clientfd);
-            if (strcmp(data, "exit\n") == 0) {
+            if (ret == 0) {
                 break;
+            } else {
+                data[ret] = '\0';
+
+                printf("client ret recv: %s", data);
+                printf("%d\n", clientfd);
+                if (strcmp(data, "exit\n") == 0) {
+                    break;
+                }
             }
+            
         }
 
     }
