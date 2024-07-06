@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <thread>
+#include <signal.h>
 
 struct threading_ctx {
     std::thread handler;
@@ -19,8 +20,8 @@ struct threading_ctx {
 
 void init_thread(struct threading_ctx *th);
 int get_free_thread(struct threading_ctx *th);
-void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int),
-        int acceptfd);
+void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int, volatile sig_atomic_t*), 
+        int acceptfd, volatile sig_atomic_t *signal_exit_now);
 int clean_thread(struct threading_ctx *th);
 
 #endif
