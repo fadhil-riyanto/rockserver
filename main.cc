@@ -62,43 +62,24 @@ void _main() {
         for(int i = 0; i < event_counter; i++) {
             freethread = get_free_thread(th);
             if (freethread == -1) {
-                fprintf(stderr, "no space available, try increase config.c max connection");
+                fprintf(stderr, 
+                        "no space available, try increase config.c max connection");
                 exit_gracefully(&sockfd);
                 break;
             } else {
                 socklen_t socketsize = sizeof(struct sockaddr_in);
-                acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, &socketsize);
-                // if (acceptfd == -1) {
-                //     perror("accept");
-                // } else {
-                //     printf("accepting ...\n");
-                //     fill_thread(th, freethread, handle_conn, acceptfd);
-                // }
-                close(acceptfd);
+                acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, 
+                    &socketsize);
+                if (acceptfd == -1) {
+                    perror("accept");
+                } else {
+                    printf("accepting ...\n");
+                    fill_thread(th, freethread, handle_conn, acceptfd);
+                }
             }
         }
 
-
-        // freethread = get_free_thread(th);
-        // if (freethread == -1) {
-        //     fprintf(stderr, "no space available, try increase config.c max connection");
-        //     exit_gracefully(&sockfd);
-        //     break;
-        // } else {
-        //     socklen_t socketsize = sizeof(struct sockaddr_in);
-        //     acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, &socketsize);
-        //     if (acceptfd == -1) {
-        //         perror("accept");
-        //     } else {
-        //         fill_thread(th, freethread, handle_conn, acceptfd);
-        //     }
-            
-        // }
-
         printf("%d\n", freethread);
-
-        
-        
     }
 }
 
