@@ -2,9 +2,11 @@ CFLAGS := -g -Wall
 OUT := main
 OUTDIR = build
 
-LOGC_FLAGS = 
+LOGC_FLAGS = -DLOG_USE_COLOR
 
 clean: 
+	rm build/*.o 
+	rm build/*.a
 	rm main
 
 epoll_watcher: epoll_watcher.cc
@@ -25,10 +27,11 @@ config: config.c
 conn: connection_handler.cc
 	g++ $? -o ${OUTDIR}/connection_handler.o ${CFLAGS} -c 
 
-logc: submodule/log.c/src/log.c
-	gcc submodule/log.c/src/log.c -o build/logc.o ${LOGC_FLAGS} -c
+logc: submodule/log.c-patched/src/log.cc
+	g++ $? -o ${OUTDIR}/logc.o ${LOGC_FLAGS} -c
 
-all: main threading config server conn epoll_watcher logc
-	g++ ${OUTDIR}/config.o ${OUTDIR}/main.o ${OUTDIR}/threading.o ${OUTDIR}/server.o \
-	${OUTDIR}/connection_handler.o ${OUTDIR}/epoll_watcher.o ${OUTDIR}/logc.o \
+all: threading config server conn epoll_watcher logc
+	g++ main.cc ${OUTDIR}/config.o ${OUTDIR}/threading.o ${OUTDIR}/server.o \
+	${OUTDIR}/connection_handler.o ${OUTDIR}/epoll_watcher.o \
+	${OUTDIR}/logc.o \
 	-o main

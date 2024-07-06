@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include "config.c"
+#include "submodule/log.c-patched/src/log.h"
 
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
@@ -79,7 +80,7 @@ void _main() {
                 if (acceptfd == -1) {
                     perror("accept");
                 } else {
-                    printf("accepting ...\n");
+                    log_info("accepting ...\n");
                     fill_thread(th, freethread, handle_conn, acceptfd, &exit_now);
                 }
             }
