@@ -14,18 +14,20 @@
 
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
-struct server_status server_status;
+struct server_ctx server_ctx;
+
+
+void exit_gracefully(struct server_ctx *server_ctx) {
+    clean_thread(th);
+    epoll_cleanup(server_ctx->epfd);
+    sock_cleanup(server_ctx->sockfd);
+}
 
 static void signal_cb(int signo) {
     exit_now = 1;
-    server_status.exit_now = (short *)&exit_now;
+
 }
 
-void exit_gracefully(int *sockfd) {
-    clean_thread(th);
-    sock_cleanup(sockfd);
-    
-}
 
 void _main() {
     struct epoll_event event, events[MAX_EVENTS];
@@ -46,6 +48,11 @@ void _main() {
         fprintf(stderr, "socket error\n");
         sock_cleanup(&sockfd);
     }
+
+    // all done
+    server_ctx.sockfd = &sockfd;
+    server_ctx.epfd = &epfd;
+
     ret = epoll_watch(sockfd, epfd, &event);
     if (ret == -1) {
         perror("epoll watch");
@@ -54,7 +61,7 @@ void _main() {
     while(1) {
         if (exit_now) {
             fprintf(stdout, "exitting");
-            exit_gracefully(&sockfd);
+            exit_gracefully(&server_ctx);
             break;
         }
 
@@ -64,7 +71,6 @@ void _main() {
             if (freethread == -1) {
                 fprintf(stderr, 
                         "no space available, try increase config.c max connection");
-                exit_gracefully(&sockfd);
                 break;
             } else {
                 socklen_t socketsize = sizeof(struct sockaddr_in);
@@ -74,7 +80,7 @@ void _main() {
                     perror("accept");
                 } else {
                     printf("accepting ...\n");
-                    fill_thread(th, freethread, handle_conn, acceptfd);
+                    fill_thread(th, freethread, handle_conn, acceptfd, &exit_now);
                 }
             }
         }
