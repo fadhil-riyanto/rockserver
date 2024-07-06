@@ -5,11 +5,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "header/connection_handler.h"
+#include <signal.h>
 
-void handle_conn(int clientfd) {
+void handle_conn(int clientfd, volatile sig_atomic_t *signal_exit_now) {
 
     size_t length = sizeof(char) * 65535;
-    ssize_t ret;
+    int ret;
 
     char *data = (char*)malloc(length);
     if (data == NULL) {
@@ -20,12 +21,10 @@ void handle_conn(int clientfd) {
         printf("handled fd %d\n", clientfd);
         while (1) {
             ret = recv(clientfd, data, length, 0);
-            if (ret == 0) {
+            if (ret == 0 || ret == -1) {
                 break;
             } else {
                 data[ret] = '\0';
-
-                printf("client ret recv: %s", data);
                 printf("%d\n", clientfd);
                 if (strcmp(data, "exit\n") == 0) {
                     break;
