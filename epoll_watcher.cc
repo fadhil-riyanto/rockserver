@@ -23,6 +23,6 @@ int epoll_watch(int fd, int epfd, struct epoll_event *event) {
     return 0;
 }
 
-void epoll_cleanup(int epfd) {
-    close(epfd);
+void epoll_cleanup(int *epfd) {
+    close(*epfd);
 }
