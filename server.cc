@@ -12,7 +12,7 @@ int sock_init(int port) {
     struct sockaddr_in sa_in;
     int sockoptval = 1;
 
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    if ((sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) == -1)
     {
         perror("socket");
         return -1;
