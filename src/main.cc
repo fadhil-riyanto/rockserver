@@ -1,8 +1,8 @@
-#include "header/server.h"
-#include "header/threading.h"
-#include "header/connection_handler.h"
+#include "../header/server.h"
+#include "../header/threading.h"
+#include "../header/connection_handler.h"
 #include <sys/epoll.h>
-#include "header/epoll_watcher.h"
+#include "../header/epoll_watcher.h"
 #include <cstring>
 #include <stdio.h>
 #include <signal.h>
@@ -12,7 +12,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include "config.c"
-#include "submodule/log.c-patched/src/log.h"
+#include "../submodule/log.c-patched/src/log.h"
 
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];

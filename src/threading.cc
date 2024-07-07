@@ -1,10 +1,10 @@
-#include "header/threading.h"
+#include "../header/threading.h"
 #include "config.c"
 #include <cstdio>
 #include <thread>
 #include <signal.h>
 #include <unistd.h>
-#include "submodule/log.c-patched/src/log.h"
+#include "../submodule/log.c-patched/src/log.h"
 
 void init_thread(struct threading_ctx *th) {
     for(int i = 0; i < MAX_CONN; i++) {

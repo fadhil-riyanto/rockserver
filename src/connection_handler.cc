@@ -5,11 +5,11 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <unistd.h>
-#include "header/connection_handler.h"
+#include "../header/connection_handler.h"
 #include <signal.h>
-#include "header/epoll_watcher.h"
+#include "../header/epoll_watcher.h"
 #include "config.c"
-#include "submodule/log.c-patched/src/log.h"
+#include "../submodule/log.c-patched/src/log.h"
 
 void handle_conn(int clientfd, volatile sig_atomic_t *signal_exit_now) {
 
