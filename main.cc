@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
+#include <sys/eventfd.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include "config.c"
@@ -16,17 +17,20 @@
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
 struct server_ctx server_ctx;
+int efd;
 
 
 void exit_gracefully(struct server_ctx *server_ctx) {
     clean_thread(th);
     epoll_cleanup(server_ctx->epfd);
     sock_cleanup(server_ctx->sockfd);
+    
 }
 
 static void signal_cb(int signo) {
     exit_now = 1;
-
+    eventfd_t data = (eventfd_t)"exit now";
+    eventfd_write(efd, data);
 }
 
 
@@ -42,8 +46,13 @@ void _main() {
     if (ret == -1) {
         perror("epoll_init()");
     }
-    
 
+    efd = eventfd(0, 0);
+    ret = epoll_watch(efd, epfd, &event);
+    if (ret == -1) {
+        perror("epoll watch");
+    }
+    
     int sockfd = sock_init(CONF_PORT);
     if (sockfd == -1) {
         fprintf(stderr, "socket error\n");
@@ -60,34 +69,43 @@ void _main() {
     }
 
     while(1) {
-        if (exit_now) {
-            fprintf(stdout, "exitting");
-            exit_gracefully(&server_ctx);
-            break;
-        }
+        
 
         event_counter = epoll_wait(epfd, events, MAX_EVENTS, -1);
         for(int i = 0; i < event_counter; i++) {
-            freethread = get_free_thread(th);
-            if (freethread == -1) {
-                fprintf(stderr, 
-                        "no space available, try increase config.c max connection");
-                break;
-            } else {
-                socklen_t socketsize = sizeof(struct sockaddr_in);
-                acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, 
-                    &socketsize);
-                if (acceptfd == -1) {
-                    perror("accept");
+            if (events[i].data.fd == sockfd) {
+                freethread = get_free_thread(th);
+                if (freethread == -1) {
+                    fprintf(stderr, 
+                            "no space available, try increase config.c max connection");
+                    break;
                 } else {
-                    log_info("accepting ...\n");
-                    fill_thread(th, freethread, handle_conn, acceptfd, &exit_now);
+                    socklen_t socketsize = sizeof(struct sockaddr_in);
+                    acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, 
+                        &socketsize);
+                    if (acceptfd == -1) {
+                        perror("accept");
+                    } else {
+                        log_info("accepting ...\n");
+                        fill_thread(th, freethread, handle_conn, acceptfd, &exit_now);
+                    }
                 }
+            } else if (events[i].data.fd == efd) {
+                log_info("eventloop going to exit\n");
+                exit_gracefully(&server_ctx);
+                // break;
+                goto _main_ret;
             }
+            
         }
-
-        printf("%d\n", freethread);
+        // log_debug("exit_now == %d\n", exit_now);
+        // if (exit_now == 1) {
+        //     fprintf(stdout, "exitting");
+        //     break;
+        // }
     }
+_main_ret:
+    return;
 }
 
 int main() {
