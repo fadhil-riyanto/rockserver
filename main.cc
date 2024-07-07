@@ -86,12 +86,12 @@ void _main() {
                     if (acceptfd == -1) {
                         perror("accept");
                     } else {
-                        log_info("accepting ...\n");
+                        log_info("accepting ...");
                         fill_thread(th, freethread, handle_conn, acceptfd, &exit_now);
                     }
                 }
             } else if (events[i].data.fd == efd) {
-                log_info("eventloop going to exit\n");
+                log_info("eventloop going to exit");
                 exit_gracefully(&server_ctx);
                 // break;
                 goto _main_ret;

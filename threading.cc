@@ -1,8 +1,10 @@
 #include "header/threading.h"
 #include "config.c"
+#include <cstdio>
 #include <thread>
 #include <signal.h>
 #include <unistd.h>
+#include "submodule/log.c-patched/src/log.h"
 
 void init_thread(struct threading_ctx *th) {
     for(int i = 0; i < MAX_CONN; i++) {
@@ -28,8 +30,11 @@ void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int, volatile in
 }
 
 int clean_thread(struct threading_ctx *th) {
+    int ret;
     for(int i = 0; i < MAX_CONN; i++) {
         if (th[i].state == 1) {
+            ret = close(th[i].acceptfd_handler);
+            log_debug("closing thread %d with status %d", i, ret);
             th[i].handler.join();
         }
         

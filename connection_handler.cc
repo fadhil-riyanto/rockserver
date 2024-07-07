@@ -26,7 +26,7 @@ void handle_conn(int clientfd, volatile sig_atomic_t *signal_exit_now) {
         perror("malloc failed");
     } else {
         memset(data, 0, length);
-        printf("handled fd %d\n", clientfd);
+        log_info("handled fd %d", clientfd);
 
         epoll_watch(clientfd, child_epfd, &child_event);
 
@@ -35,17 +35,18 @@ void handle_conn(int clientfd, volatile sig_atomic_t *signal_exit_now) {
             for(int i = 0; i < child_epfd_event_len; i++) {
                 ret = recv(child_events[i].data.fd, data, length, 0);
                 if (ret == 0 || ret == -1) {
-                    break;
+                    goto thread_ask_to_exit;
                 } else {
                     data[ret] = '\0';
                     log_debug("fd %d says: %s", child_events[i].data.fd, data);
                     if (strcmp(data, "exit\n") == 0) {
-                        break;
+                        goto thread_ask_to_exit;
                     }
                 }
             }
 
             if (*signal_exit_now == 1) {
+                thread_ask_to_exit:
                 log_info("thread exit");
                 break;
             }
