@@ -1,5 +1,6 @@
-#include "../header/server.h"
 #include "../header/threading.h"
+#include "../header/server.h"
+
 #include "../header/connection_handler.h"
 #include <sys/epoll.h>
 #include "../header/epoll_watcher.h"
@@ -28,6 +29,13 @@ void exit_gracefully(struct server_ctx *server_ctx) {
     
 }
 
+void serverstate_install_req_data(volatile sig_atomic_t *exit_now, 
+                                struct threading_ctx *threading_ctx) 
+{
+    server_state.exit_now = exit_now;
+    server_state.threading_ch_ctx = threading_ctx;
+}
+
 static void signal_cb(int signo) {
     exit_now = 1;
     eventfd_t data = (eventfd_t)"exit now";
@@ -44,7 +52,7 @@ void _main() {
     memset(&ret, 0, sizeof(ret));
     memset(&server_state, 0, sizeof(server_state_t));
 
-    server_state.exit_now = &exit_now;
+    serverstate_install_req_data(&exit_now, th);
 
     ret = epoll_init(&epfd);
     if (ret == -1) {
@@ -74,7 +82,7 @@ void _main() {
 
     while(1) {
         
-        printf("looping while\n");
+        clean_thread_queue(th);
         event_counter = epoll_wait(epfd, events, MAX_EVENTS, -1);
         for(int i = 0; i < event_counter; i++) {
             if (events[i].data.fd == sockfd) {

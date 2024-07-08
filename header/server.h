@@ -14,7 +14,8 @@ struct server_ctx {
 typedef struct server_state {
     volatile sig_atomic_t *exit_now;
 
-    // future, thread object
+    void *threading_ch_ctx;
+
 } server_state_t;
 
 int sock_init(int port);

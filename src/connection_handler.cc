@@ -5,10 +5,18 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <unistd.h>
-#include "../header/connection_handler.h"
 #include "../header/epoll_watcher.h"
 #include "config.c"
 #include "../submodule/log.c-patched/src/log.h"
+#include "../header/threading.h"
+
+
+void setsignal_thread_free(server_state_t *server_state, 
+                            int thread_num)
+{
+    struct threading_ctx* th_ch_ctx = (struct threading_ctx*)server_state->threading_ch_ctx;
+    th_ch_ctx[thread_num].state = 0;
+}
 
 void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
 

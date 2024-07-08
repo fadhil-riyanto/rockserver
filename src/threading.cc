@@ -21,11 +21,24 @@ int get_free_thread(struct threading_ctx *th) {
     return -1;
 }
 
-void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int, server_state_t*, int), int acceptfd, server_state_t *server_state, int thread_num) {
+void fill_thread(struct threading_ctx *th, int thnum, 
+                    void (*f)(int, server_state_t*, int), int acceptfd, 
+                    server_state_t *server_state, int thread_num)
+{
     th[thnum].handler = std::thread(f, acceptfd, server_state, thread_num);
     th[thnum].state = 1;
     th[thnum].th_index = thnum;
     th[thnum].acceptfd_handler = acceptfd;
+}
+
+void clean_thread_queue(struct threading_ctx *th)
+{
+    for(int i = 0; i < MAX_CONN; i++) {
+        if (th[i].state == 1) {
+            log_debug("detected unused thread #%d", i);
+        }
+    }
+        
 }
 
 int clean_thread(struct threading_ctx *th) {
