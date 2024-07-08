@@ -10,7 +10,7 @@
 #include "config.c"
 #include "../submodule/log.c-patched/src/log.h"
 
-void handle_conn(int clientfd, server_state_t *server_state) {
+void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
 
     size_t length = sizeof(char) * 65535;
     int ret;
@@ -37,7 +37,8 @@ void handle_conn(int clientfd, server_state_t *server_state) {
                     goto thread_ask_to_exit;
                 } else {
                     data[ret] = '\0';
-                    log_debug("fd %d says: %s", child_events[i].data.fd, data);
+                    log_debug("fd %d on thread %d says: %s", child_events[i].data.fd, thread_num, 
+                                    data);
                     if (strcmp(data, "exit\n") == 0) {
                         goto thread_ask_to_exit;
                     }

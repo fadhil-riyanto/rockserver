@@ -3,6 +3,6 @@
 
 #include "server.h"
 
-void handle_conn(int clientfd, server_state_t *server_state);
+void handle_conn(int clientfd, server_state_t *server_state, int thread_num);
 
 #endif

@@ -74,7 +74,7 @@ void _main() {
 
     while(1) {
         
-
+        printf("looping while\n");
         event_counter = epoll_wait(epfd, events, MAX_EVENTS, -1);
         for(int i = 0; i < event_counter; i++) {
             if (events[i].data.fd == sockfd) {
@@ -91,7 +91,7 @@ void _main() {
                         perror("accept");
                     } else {
                         log_info("accepting ...");
-                        fill_thread(th, freethread, handle_conn, acceptfd, &server_state);
+                        fill_thread(th, freethread, handle_conn, acceptfd, &server_state, freethread);
                     }
                 }
             } else if (events[i].data.fd == efd) {
