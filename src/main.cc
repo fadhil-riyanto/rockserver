@@ -2,9 +2,11 @@
 #include "../header/server.h"
 
 #include "../header/connection_handler.h"
+#include <cstddef>
 #include <sys/epoll.h>
 #include "../header/epoll_watcher.h"
 #include <cstring>
+#include <string>
 #include <stdio.h>
 #include <signal.h>
 #include <sys/epoll.h>
@@ -13,6 +15,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include "config.c"
+#include "utils/utils.h"
 #include "../submodule/log.c-patched/src/log.h"
 
 volatile sig_atomic_t exit_now = 0;
@@ -41,7 +44,6 @@ static void signal_cb(int signo) {
     eventfd_t data = (eventfd_t)"exit now";
     eventfd_write(efd, data);
 }
-
 
 void _main() {
     struct epoll_event event, events[MAX_EVENTS];
@@ -83,14 +85,15 @@ void _main() {
     while(1) {
         
         clean_thread_queue(th);
-        event_counter = epoll_wait(epfd, events, MAX_EVENTS, -1);
+        event_counter = epoll_wait(epfd, events, MAX_EVENTS, 1000);
         for(int i = 0; i < event_counter; i++) {
             if (events[i].data.fd == sockfd) {
                 freethread = get_free_thread(th);
                 if (freethread == -1) {
-                    fprintf(stderr, 
-                            "no space available, try increase config.c max connection");
-                    break;
+                    log_fatal("no space available, try increase config.c max connection");
+                    // break;
+                    std::string res = "SERVER_FULL";
+                    dump_req(events[i].data.fd, res.c_str(), res.length());
                 } else {
                     socklen_t socketsize = sizeof(struct sockaddr_in);
                     acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, 

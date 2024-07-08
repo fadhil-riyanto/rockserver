@@ -4,6 +4,8 @@ OUTDIR = build
 
 LOGC_FLAGS = -DLOG_USE_COLOR
 
+UTILS_FILE = src/utils/req.cc
+
 clean: 
 	rm build/*.o 
 	rm build/*.a
@@ -30,8 +32,11 @@ conn: src/connection_handler.cc
 logc: submodule/log.c-patched/src/log.cc
 	g++ $? -o ${OUTDIR}/logc.o ${LOGC_FLAGS} -c
 
-all: threading config server conn epoll_watcher logc
+utils:
+	g++ ${UTILS_FILE} -o ${OUTDIR}/utils.o -c
+
+all: threading config server conn epoll_watcher logc utils
 	g++ src/main.cc ${OUTDIR}/config.o ${OUTDIR}/threading.o ${OUTDIR}/server.o \
 	${OUTDIR}/connection_handler.o ${OUTDIR}/epoll_watcher.o \
-	${OUTDIR}/logc.o \
+	${OUTDIR}/logc.o ${OUTDIR}/utils.o \
 	-o main
