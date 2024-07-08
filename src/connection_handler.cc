@@ -11,15 +11,18 @@
 #include "../header/threading.h"
 
 
-void setsignal_thread_free(server_state_t *server_state, 
-                            int thread_num)
-{
-    struct threading_ctx* th_ch_ctx = (struct threading_ctx*)server_state->threading_ch_ctx;
-    th_ch_ctx[thread_num].state = 0;
-}
+// void setsignal_thread_free(server_state_t **server_state, 
+//                             int thread_num)
+// {
+//     log_debug("thread %d", thread_num);
+//     struct threading_ctx* th_ch_ctx = (struct threading_ctx*)*server_state->threading_ch_ctx;
+//     // th_ch_ctx[thread_num].state = 0;
+//     // th_ch_ctx[thread_num].need_clean.store(1, std::memory_order::memory_order_seq_cst);
+// }
 
 void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
 
+    log_debug("thread %d", thread_num);
     size_t length = sizeof(char) * 65535;
     int ret;
     int child_epfd;
@@ -58,15 +61,18 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                 log_info("thread exit");
                 break;
             }
-
-            
-            // close(clientfd);
-          
-            
         }
 
     }
+
     
+
+    // setsignal_thread_free(*server_state, thread_num);
+    struct threading_ctx* structdata = (struct threading_ctx*)server_state->threading_ch_ctx;
+    structdata[thread_num].state = 0;
+    structdata[thread_num].need_join = 1;
+    printf("struct %d\n", structdata[0].state);
+
     free(data);
-    close(clientfd);
+    close(child_epfd);
 }

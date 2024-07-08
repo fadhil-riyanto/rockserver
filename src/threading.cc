@@ -1,6 +1,7 @@
 #include "../header/threading.h"
 #include "../header/server.h"
 #include "config.c"
+#include <atomic>
 #include <thread>
 #include <unistd.h>
 #include "../submodule/log.c-patched/src/log.h"
@@ -14,7 +15,7 @@ void init_thread(struct threading_ctx *th) {
 
 int get_free_thread(struct threading_ctx *th) {
     for(int i = 0; i < MAX_CONN; i++) {
-        if (th[i].state == 0) {
+        if (th[i].state == 0 && th[i].need_join == 0) {
             return th[i].th_index;
         }
     }
@@ -27,6 +28,8 @@ void fill_thread(struct threading_ctx *th, int thnum,
 {
     th[thnum].handler = std::thread(f, acceptfd, server_state, thread_num);
     th[thnum].state = 1;
+    // th[thnum].need_clean.store(0, std::memory_order::memory_order_seq_cst);
+    th[thnum].need_join = 0;
     th[thnum].th_index = thnum;
     th[thnum].acceptfd_handler = acceptfd;
 }
@@ -34,8 +37,11 @@ void fill_thread(struct threading_ctx *th, int thnum,
 void clean_thread_queue(struct threading_ctx *th)
 {
     for(int i = 0; i < MAX_CONN; i++) {
-        if (th[i].state == 1) {
-            log_debug("detected unused thread #%d", i);
+        if (th[i].state == 0 && th[i].need_join == 1) {
+            log_debug("cleaning unused thread #%d", i);
+            close(th[i].acceptfd_handler);
+            th[i].handler.join();
+            th[i].need_join = 0;
         }
     }
         
