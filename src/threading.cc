@@ -1,8 +1,7 @@
 #include "../header/threading.h"
+#include "../header/server.h"
 #include "config.c"
-#include <cstdio>
 #include <thread>
-#include <signal.h>
 #include <unistd.h>
 #include "../submodule/log.c-patched/src/log.h"
 
@@ -22,8 +21,8 @@ int get_free_thread(struct threading_ctx *th) {
     return -1;
 }
 
-void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int, volatile int*), int acceptfd, volatile sig_atomic_t *signal_exit_now) {
-    th[thnum].handler = std::thread(f, acceptfd, signal_exit_now);
+void fill_thread(struct threading_ctx *th, int thnum, void (*f)(int, server_state_t*), int acceptfd, server_state_t *server_state) {
+    th[thnum].handler = std::thread(f, acceptfd, server_state);
     th[thnum].state = 1;
     th[thnum].th_index = thnum;
     th[thnum].acceptfd_handler = acceptfd;

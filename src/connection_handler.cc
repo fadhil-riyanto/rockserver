@@ -6,12 +6,11 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 #include "../header/connection_handler.h"
-#include <signal.h>
 #include "../header/epoll_watcher.h"
 #include "config.c"
 #include "../submodule/log.c-patched/src/log.h"
 
-void handle_conn(int clientfd, volatile sig_atomic_t *signal_exit_now) {
+void handle_conn(int clientfd, server_state_t *server_state) {
 
     size_t length = sizeof(char) * 65535;
     int ret;
@@ -45,7 +44,7 @@ void handle_conn(int clientfd, volatile sig_atomic_t *signal_exit_now) {
                 }
             }
 
-            if (*signal_exit_now == 1) {
+            if (*server_state->exit_now == 1) {
                 thread_ask_to_exit:
                 log_info("thread exit");
                 break;

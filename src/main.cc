@@ -18,6 +18,7 @@ volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
 struct server_ctx server_ctx;
 int efd;
+server_state_t server_state;
 
 
 void exit_gracefully(struct server_ctx *server_ctx) {
@@ -41,6 +42,9 @@ void _main() {
     int acceptfd = 0;
     short ret;
     memset(&ret, 0, sizeof(ret));
+    memset(&server_state, 0, sizeof(server_state_t));
+
+    server_state.exit_now = &exit_now;
 
     ret = epoll_init(&epfd);
     if (ret == -1) {
@@ -87,7 +91,7 @@ void _main() {
                         perror("accept");
                     } else {
                         log_info("accepting ...");
-                        fill_thread(th, freethread, handle_conn, acceptfd, &exit_now);
+                        fill_thread(th, freethread, handle_conn, acceptfd, &server_state);
                     }
                 }
             } else if (events[i].data.fd == efd) {
