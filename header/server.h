@@ -15,6 +15,7 @@ typedef struct server_state {
     volatile sig_atomic_t *exit_now;
 
     void *threading_ch_ctx;
+    struct rocksdb_ctx *rocksdb_ctx;
 
 } server_state_t;
 

@@ -2,7 +2,7 @@
 #include "../header/server.h"
 
 #include "../header/connection_handler.h"
-#include <cstddef>
+#include "../header/rocksdb_ctx.h"
 #include <sys/epoll.h>
 #include "../header/epoll_watcher.h"
 #include <cstring>
@@ -19,14 +19,13 @@
 #include "../submodule/log.c-patched/src/log.h"
 #include "../submodule/inih/ini.h"
 #include "../header/inih_reader.h"
-
+#include "rocksdb/db.h"
 
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
 struct server_ctx server_ctx;
 int efd;
 server_state_t server_state;
-
 
 void exit_gracefully(struct server_ctx *server_ctx) {
     clean_thread(th);
@@ -48,7 +47,24 @@ static void signal_cb(int signo) {
     eventfd_write(efd, data);
 }
 
-void _main() {
+static int rocksdb_setup(char *path, rocksdb::DB* db)
+{
+        rocksdb::Options options;
+        options.create_if_missing = true;
+
+        rocksdb::Status status = rocksdb::DB::Open(options, path, &db);
+        return status.ok();
+
+}
+
+void _main(struct config *pconfig) {
+
+        struct rocksdb_ctx rocksdb_ctx;
+
+        rocksdb_setup(pconfig->db_path, rocksdb_ctx.db);
+        server_state.rocksdb_ctx = &rocksdb_ctx;
+
+
     struct epoll_event event, events[MAX_EVENTS];
     int epfd, event_counter;
     int freethread = 0;
@@ -139,12 +155,13 @@ int main() {
         return 1;
     }
 
-    printf("Config loaded from '/etc/rockserver/config.ini': port=%d, max_conn=%d\n",
-        pconfig.conf_port, pconfig.max_conn);
+    printf("Config loaded from '/etc/rockserver/config.ini': port=%d, max_conn=%d, path=%s\n",
+        pconfig.conf_port, pconfig.max_conn, pconfig.db_path);
 
     
     // initialization
     init_thread(th);
-    _main();
+    _main(&pconfig);
+    free(pconfig.db_path);
     return -1;
 }

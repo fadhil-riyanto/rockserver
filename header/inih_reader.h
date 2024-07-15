@@ -6,6 +6,7 @@ struct config {
         int max_conn;
         int max_events;
         int child_maxevents;
+        char *db_path;
 };
 
 int inih_cb(void* user, const char* section, const char* name,
