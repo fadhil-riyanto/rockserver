@@ -17,6 +17,9 @@
 #include "config.c"
 #include "utils/utils.h"
 #include "../submodule/log.c-patched/src/log.h"
+#include "../submodule/inih/ini.h"
+#include "../header/inih_reader.h"
+
 
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
@@ -128,6 +131,17 @@ int main() {
         perror("signal err on set");
         return -1;
     }
+
+    struct config pconfig;
+
+    if (ini_parse("etc/rockserver/config.ini", inih_cb, &pconfig) < 0) {
+        printf("Can't load 'test.ini'\n");
+        return 1;
+    }
+
+    printf("Config loaded from '/etc/rockserver/config.ini': port=%d, max_conn=%d\n",
+        pconfig.conf_port, pconfig.max_conn);
+
     
     // initialization
     init_thread(th);
