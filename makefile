@@ -2,6 +2,7 @@ CFLAGS := -g -Wall
 OUT := main
 OUTDIR = build
 LIBCFLAGS = -c
+LINKERFLAGS = -lrocksdb
 
 LOGC_FLAGS = -DLOG_USE_COLOR
 
@@ -47,4 +48,4 @@ all: threading config server conn epoll_watcher logc inih utils inih_parser
 	${OUTDIR}/connection_handler.o ${OUTDIR}/epoll_watcher.o 		\
 	${OUTDIR}/logc.o ${OUTDIR}/utils.o 					\
 	${OUTDIR}/inih.o ${OUTDIR}/inih_parser.o				\
-	-o main ${CFLAGS}
+	-o main ${CFLAGS} ${LINKERFLAGS}
