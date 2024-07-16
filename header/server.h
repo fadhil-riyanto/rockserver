@@ -4,18 +4,18 @@
 #include <signal.h>
 
 struct server_ctx {
-    int *sockfd;
-    int *epfd;
+        int *sockfd;
+        int *epfd;
 };
 
 /**
  * all initialization from server carried by this struct
  */
 typedef struct server_state {
-    volatile sig_atomic_t *exit_now;
+        volatile sig_atomic_t *exit_now;
 
-    void *threading_ch_ctx;
-    struct rocksdb_ctx *rocksdb_ctx;
+        void *threading_ch_ctx;
+        struct rocksdb_ctx *rocksdb_ctx;
 
 } server_state_t;
 

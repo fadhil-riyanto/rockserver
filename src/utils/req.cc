@@ -4,18 +4,19 @@
 #include "utils.h"
 #include <stdio.h>
 
-void dump_req(int sockfd, const char* reason, size_t len) {
-    short ret;
-    struct sockaddr_in clientaddr_dumped;
+void dump_req(int sockfd, const char* reason, size_t len) 
+{
+        short ret;
+        struct sockaddr_in clientaddr_dumped;
 
-    socklen_t socketsize = sizeof(struct sockaddr_in);
-    int acceptfd = accept(sockfd, (struct sockaddr *)&clientaddr_dumped, 
-        &socketsize);
+        socklen_t socketsize = sizeof(struct sockaddr_in);
+        int acceptfd = accept(sockfd, (struct sockaddr *)&clientaddr_dumped, 
+            &socketsize);
 
-    ret = send(acceptfd, (char*)reason, len, 0);
+        ret = send(acceptfd, (char*)reason, len, 0);
 
-    if (ret == -1) {
-        perror("send on dump_req()");
-    }
-    close(acceptfd);
+        if (ret == -1) {
+                perror("send on dump_req()");
+        }
+        close(acceptfd);
 }
