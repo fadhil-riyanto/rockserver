@@ -59,6 +59,21 @@ static int rocksdb_setup(char *path, rocksdb::DB* db)
 
 }
 
+static void handle_accept(int sockfd, int freethread)
+{
+        int acceptfd = 0;
+        socklen_t socketsize = sizeof(struct sockaddr_in);
+        acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, 
+                &socketsize);
+        if (acceptfd == -1) {
+                perror("accept");
+        } else {
+                log_info("accepting ...");
+                fill_thread(th, freethread, handle_conn, acceptfd, 
+                                &server_state, freethread);
+        }
+}
+
 static void _main(struct config *pconfig)
 {
         struct rocksdb_ctx rocksdb_ctx;
@@ -116,15 +131,7 @@ static void _main(struct config *pconfig)
                                 std::string res = "SERVER_FULL";
                                 dump_req(events[i].data.fd, res.c_str(), res.length());
                         } else {
-                                socklen_t socketsize = sizeof(struct sockaddr_in);
-                                acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, 
-                                        &socketsize);
-                                if (acceptfd == -1) {
-                                        perror("accept");
-                                } else {
-                                        log_info("accepting ...");
-                                        fill_thread(th, freethread, handle_conn, acceptfd, &server_state, freethread);
-                                }
+                                handle_accept(sockfd, freethread);
                         }
                 } else if (events[i].data.fd == efd) {
                         log_info("eventloop going to exit");
