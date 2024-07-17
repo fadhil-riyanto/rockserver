@@ -100,10 +100,11 @@ static void handle_on_sock_req(int sockfd, struct threading_ctx *th, struct epol
 
 static void _main(struct config *pconfig)
 {
-        struct rocksdb_ctx rocksdb_ctx;
+        // struct rocksdb_ctx rocksdb_ctx;
+        rocksdb::DB* db;
 
-        rocksdb_setup(pconfig->db_path, rocksdb_ctx.db);
-        server_state.rocksdb_ctx = &rocksdb_ctx;
+        rocksdb_setup(pconfig->db_path, db);
+        // server_state.rocksdb_ctx = &db;
 
 
         struct epoll_event event, events[MAX_EVENTS];
@@ -166,7 +167,7 @@ static void _main(struct config *pconfig)
             
                 }
         }
-        delete rocksdb_ctx.db;
+        delete db;
 _main_ret:
     return;
 }
