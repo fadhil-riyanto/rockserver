@@ -52,6 +52,9 @@ static void signal_cb(int signo)
 static int rocksdb_setup(char *path, rocksdb::DB* db)
 {
         rocksdb::Options options;
+        options.IncreaseParallelism();
+        options.OptimizeLevelStyleCompaction();
+
         options.create_if_missing = true;
 
         rocksdb::Status status = rocksdb::DB::Open(options, path, &db);
@@ -123,25 +126,27 @@ static void _main(struct config *pconfig)
                 clean_thread_queue(th);
                 event_counter = epoll_wait(epfd, events, MAX_EVENTS, 1000);
                 for(int i = 0; i < event_counter; i++) {
-                if (events[i].data.fd == sockfd) {
-                        freethread = get_free_thread(th);
-                        if (freethread == -1) {
-                                log_fatal("no space available, try increase config.c max connection");
+                        if (events[i].data.fd == sockfd) {
+                                freethread = get_free_thread(th);
+                                if (freethread == -1) {
+                                        log_fatal("no space available, try increase config.c max connection");
+                                        // break;
+                                        std::string res = "SERVER_FULL";
+                                        dump_req(events[i].data.fd, res.c_str(), res.length());
+                                } else {
+                                        printf("something happen\n");
+                                        handle_accept(sockfd, freethread);
+                                }
+                        } else if (events[i].data.fd == efd) {
+                                log_info("eventloop going to exit");
+                                exit_gracefully(&server_ctx);
                                 // break;
-                                std::string res = "SERVER_FULL";
-                                dump_req(events[i].data.fd, res.c_str(), res.length());
-                        } else {
-                                handle_accept(sockfd, freethread);
+                                goto _main_ret;
                         }
-                } else if (events[i].data.fd == efd) {
-                        log_info("eventloop going to exit");
-                        exit_gracefully(&server_ctx);
-                        // break;
-                        goto _main_ret;
-                }
             
+                }
         }
-    }
+        delete rocksdb_ctx.db;
 _main_ret:
     return;
 }
