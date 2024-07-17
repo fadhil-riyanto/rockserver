@@ -71,11 +71,29 @@ static int __define_opcode(char *op_code_str, struct parse_res *res)
         }
         return 0;
 }
+
+/* how parse works:
+1. split '"' into 4 segment
+2. - 0 segmen no counted
+   = 1 segment counted as key
+   - 2 segment counted as space
+   - 3 segment counted as value
+   - 4 segment counted as end
+
+3. variable turn mean, its op1 turn or op2 turn
+4. c1 and c2 is counter
+
+
+*/
  
 static int parse(char* text, int len_alloc, struct parse_res *res)
 {
         int ret;
         int op1_req_len, op2_req_len;
+        int turn = 0;
+        int quote = 0;
+        int c1 = 0;
+        int c2 = 0;
 
         /* find the opcode */
         __find_opcode(text, res);
@@ -84,18 +102,38 @@ static int parse(char* text, int len_alloc, struct parse_res *res)
                 fprintf(stderr, "opcode invalid");
         }
 
-        // sdd(res->tmp_opcode);
-        idd(res->op_code);
+        /* start from offset 3 */
+        for(int i = 0; i < len_alloc; i++) {
+                char tmp = *(text + i);
+                if (tmp == '"') {
+                        /* pass */
+                        quote++;
+                        if (quote == 2) {
+                                turn = 1;
+                        }
+                } else {
+                        if (quote == 1 && tmp != ' ' && turn == 0) {
+                                *(res->op1 + c1) = tmp;
+                                c1++;
+                        }
+                        if (quote == 3 && tmp != ' ' && turn == 1) {
+                                *(res->op2 + c2) = tmp;
+                                c2++;
+                        }
 
-        
-        
+                        if (quote == 2 && tmp == ' ') {
+                                *(res->op1 + c1) = '\0';
+                        }
+                        if (quote == 4 && tmp == ' ') {
+                                *(res->op2 + c2) = '\0';
+                        }
+                        // sdd("space");
+                        
+                }
+        }
 
-        // for(int i = 0; i < len_alloc; i++) {
-        //         cdd(*(text + i));
-        //         if ((*text + 1) == 'a') {
-        //                 printf("found double mark at off %d\n", i);
-        //         }
-        // }
+        sdd(res->op1);
+        sdd(res->op2);
 
 
         return 0;
@@ -103,7 +141,7 @@ static int parse(char* text, int len_alloc, struct parse_res *res)
 
 int main()
 {
-        char *setcommand = "get \"aaaa\" \"bbbbb\"";
+        char *setcommand = "set \"testbigvalueisset\" \"nowisvalue\"";
 
         struct parse_res res;
         alloc_parse(&res);
