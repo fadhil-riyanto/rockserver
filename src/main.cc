@@ -77,6 +77,27 @@ static void handle_accept(int sockfd, int freethread)
         }
 }
 
+static void thread_full(int epfd_tcpfd)
+{
+        log_fatal("no space available, try increase config.c max connection");
+                                        // break;
+        std::string res = "SERVER_FULL";
+        dump_req(epfd_tcpfd, res.c_str(), res.length());
+}
+
+static void handle_on_sock_req(int sockfd, struct threading_ctx *th, struct epoll_event *events,
+                                int i)
+{
+        int freethread = 0;
+        freethread = get_free_thread(th);
+        if (freethread == -1) {
+                thread_full(events[i].data.fd);
+        } else {
+                printf("something happen\n");
+                handle_accept(sockfd, freethread);
+        }
+}
+
 static void _main(struct config *pconfig)
 {
         struct rocksdb_ctx rocksdb_ctx;
@@ -127,16 +148,15 @@ static void _main(struct config *pconfig)
                 event_counter = epoll_wait(epfd, events, MAX_EVENTS, 1000);
                 for(int i = 0; i < event_counter; i++) {
                         if (events[i].data.fd == sockfd) {
-                                freethread = get_free_thread(th);
+                                /* freethread = get_free_thread(th);
                                 if (freethread == -1) {
-                                        log_fatal("no space available, try increase config.c max connection");
-                                        // break;
-                                        std::string res = "SERVER_FULL";
-                                        dump_req(events[i].data.fd, res.c_str(), res.length());
+                                        thread_full(events[i].data.fd)l
                                 } else {
                                         printf("something happen\n");
                                         handle_accept(sockfd, freethread);
-                                }
+                                } */
+
+                                handle_on_sock_req(sockfd, th, events, i);
                         } else if (events[i].data.fd == efd) {
                                 log_info("eventloop going to exit");
                                 exit_gracefully(&server_ctx);
