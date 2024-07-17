@@ -33,35 +33,35 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
 
         char *data = (char*)malloc(length);
         if (data == NULL) {
-            perror("malloc failed");
+                perror("malloc failed");
         } else {
-            memset(data, 0, length);
-            log_info("handled fd %d", clientfd);
+                memset(data, 0, length);
+                log_info("handled fd %d", clientfd);
 
-            epoll_watch(clientfd, child_epfd, &child_event);
+                epoll_watch(clientfd, child_epfd, &child_event);
 
-            while (1) {
-                child_epfd_event_len = epoll_wait(child_epfd, child_events, CHILD_MAXEVENTS, 1000);
-                for(int i = 0; i < child_epfd_event_len; i++) {
-                        ret = recv(child_events[i].data.fd, data, length, 0);
-                        if (ret == 0 || ret == -1) {
-                                goto thread_ask_to_exit;
-                        } else {
-                                data[ret] = '\0';
-                                log_debug("fd %d on thread %d says: %s", child_events[i].data.fd, thread_num, 
-                                                        data);
-                                if (strcmp(data, "exit\n") == 0) {
-                                    goto thread_ask_to_exit;
+                while (1) {
+                        child_epfd_event_len = epoll_wait(child_epfd, child_events, CHILD_MAXEVENTS, 1000);
+                        for(int i = 0; i < child_epfd_event_len; i++) {
+                                ret = recv(child_events[i].data.fd, data, length, 0);
+                                if (ret == 0 || ret == -1) {
+                                        goto thread_ask_to_exit;
+                                } else {
+                                        data[ret] = '\0';
+                                        log_debug("fd %d on thread %d says: %s", child_events[i].data.fd, thread_num, 
+                                                                data);
+                                        if (strcmp(data, "exit\n") == 0) {
+                                        goto thread_ask_to_exit;
+                                        }
                                 }
                         }
-                    }
 
-                    if (*server_state->exit_now == 1) {
-                        thread_ask_to_exit:
-                        log_info("thread exit");
-                        break;
-                    }
-            }
+                        if (*server_state->exit_now == 1) {
+                                thread_ask_to_exit:
+                                log_info("thread exit");
+                                break;
+                        }
+                }
 
         }
         
