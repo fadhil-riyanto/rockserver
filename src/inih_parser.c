@@ -18,7 +18,10 @@ int inih_cb(void* user, const char* section, const char* name,
                 pconfig->child_maxevents = atoi(value);
         } else if (MATCH("server", "db_path")) {
                 pconfig->db_path = strdup(value);
-        } else {
+        } else if (MATCH("server", "io_uring_queue_depth")) {
+                pconfig->io_uring_queue_depth = atoi(value);
+        } 
+        else {
                 return 0;  /* unknown section/name, error */
         }
         return 1;

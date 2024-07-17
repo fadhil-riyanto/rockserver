@@ -20,6 +20,7 @@
 #include "../submodule/inih/ini.h"
 #include "../header/inih_reader.h"
 #include "rocksdb/db.h"
+#include <liburing.h>
 
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
@@ -59,28 +60,71 @@ static int rocksdb_setup(char *path, rocksdb::DB* db)
 
 }
 
-static void handle_accept(int sockfd, int freethread)
+static int read_accept_queue(struct io_uring *ring)
 {
-        int acceptfd = 0;
-        socklen_t socketsize = sizeof(struct sockaddr_in);
-        acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, 
-                &socketsize);
-        if (acceptfd == -1) {
-                perror("accept");
-        } else {
-                log_info("accepting ...");
-                fill_thread(th, freethread, handle_conn, acceptfd, 
-                                &server_state, freethread);
+        int freethread = 0;
+        while(1)
+        {
+                int ret;
+                struct io_uring_cqe *cqe;
+
+                ret = io_uring_wait_cqe(ring, &cqe);
+                if (ret < 0)
+                {
+                        perror("io_uring_wait_cqe");
+                        return -1;
+                }
+                // write(cqe->res, "oke\n\0", 5);
+                freethread = cqe->user_data;
+
+                fill_thread(th, cqe->user_data, handle_conn, cqe->res, 
+                                &server_state, cqe->user_data);
+
+                io_uring_cqe_seen(ring, cqe);
         }
+
+        
+
+}
+
+static void send_accept_queue(int sockfd, int freethread, struct io_uring *ring)
+{
+        int l_freethread = freethread;
+        /* get submission queue */
+        struct io_uring_sqe *sqe = io_uring_get_sqe(ring);
+
+        /* int acceptfd = 0; */
+        socklen_t socketsize = sizeof(struct sockaddr_in);
+        /* acceptfd = accept(sockfd, (struct sockaddr *)&th[freethread].clientaddr, 
+                &socketsize); */
+
+        io_uring_prep_accept(sqe, sockfd, (struct sockaddr *)&th[freethread].clientaddr, 
+                &socketsize, 0);
+
+        io_uring_sqe_set_data(sqe, (void*)&l_freethread);
+        io_uring_submit(ring);
+
+        // io_uring_sqe_set_data(sqe, fi);
+
+
+        // if (acceptfd == -1) {
+        //         perror("accept");
+        // } else {
+        //         log_info("accepting ...");
+        //         fill_thread(th, freethread, handle_conn, acceptfd, 
+        //                         &server_state, freethread);
+        // }
 }
 
 static void _main(struct config *pconfig)
 {
         struct rocksdb_ctx rocksdb_ctx;
+        struct io_uring queue_ring;
 
         rocksdb_setup(pconfig->db_path, rocksdb_ctx.db);
         server_state.rocksdb_ctx = &rocksdb_ctx;
 
+        io_uring_queue_init(pconfig->io_uring_queue_depth, &queue_ring, 0);
 
         struct epoll_event event, events[MAX_EVENTS];
         int epfd, event_counter;
@@ -131,7 +175,8 @@ static void _main(struct config *pconfig)
                                 std::string res = "SERVER_FULL";
                                 dump_req(events[i].data.fd, res.c_str(), res.length());
                         } else {
-                                handle_accept(sockfd, freethread);
+                                send_accept_queue(sockfd, freethread, &queue_ring);
+                                read_accept_queue(&queue_ring);
                         }
                 } else if (events[i].data.fd == efd) {
                         log_info("eventloop going to exit");

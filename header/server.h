@@ -2,6 +2,7 @@
 #define SERVER_H
 
 #include <signal.h>
+#include <liburing.h>
 
 struct server_ctx {
         int *sockfd;

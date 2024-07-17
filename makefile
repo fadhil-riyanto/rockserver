@@ -2,7 +2,7 @@ CFLAGS := -g -Wall
 OUT := main
 OUTDIR = build
 LIBCFLAGS = -c
-LINKERFLAGS = -lrocksdb
+LINKERFLAGS = -lrocksdb -luring
 
 LOGC_FLAGS = -DLOG_USE_COLOR
 
