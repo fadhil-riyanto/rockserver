@@ -2,6 +2,9 @@
 # introduction
 <a href="https://github.com/facebook/rocksdb">RocksDB</a> is an embedded database. This program is a server ported version using the RocksDB Facebook backend.
 
+# Warning
+pure valgrind output of facebook rocksdb: http://0x0.st/X9aR.txt
+
 ## build
 1. get the source code
 ```sh
