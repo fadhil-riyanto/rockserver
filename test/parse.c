@@ -31,17 +31,17 @@ struct parse_res
         char *tmp_opcode;
 } __attribute__((__aligned__(32))) ; /* reserved first 32 bit align */
 
-static void alloc_parse(struct parse_res *res)
+void alloc_parse(struct parse_res *res)
 {
         // alloc first
-        res->op1 = malloc(MAX_PAGESIZE);
-        res->op2 = malloc(MAX_PAGESIZE);
-        res->tmp_opcode = malloc(sizeof(char) * (OPCODE_LENGTH + 1));
+        res->op1 = (char*)malloc(MAX_PAGESIZE);
+        res->op2 = (char*)malloc(MAX_PAGESIZE);
+        res->tmp_opcode = (char*)malloc(sizeof(char) * (OPCODE_LENGTH + 1));
         
 }
 
 
-static void free_parse(struct parse_res *res)
+void free_parse(struct parse_res *res)
 {
         // alloc first
         free(res->op1);
@@ -86,7 +86,7 @@ static int __define_opcode(char *op_code_str, struct parse_res *res)
 
 */
  
-static int parse(char* text, int len_alloc, struct parse_res *res)
+int parse(char* text, int len_alloc, struct parse_res *res)
 {
         int ret;
         int op1_req_len, op2_req_len;
@@ -132,22 +132,23 @@ static int parse(char* text, int len_alloc, struct parse_res *res)
                 }
         }
 
-        sdd(res->op1);
-        sdd(res->op2);
+        // sdd(res->op1);
+        // sdd(res->op2);
 
 
         return 0;
 }
 
-int main()
-{
-        char *setcommand = "set \"testbigvalueisset\" \"nowisvalue\"";
 
-        struct parse_res res;
-        alloc_parse(&res);
-        parse(setcommand, strlen(setcommand), &res);
+// int main()
+// {
+//         char *setcommand = "set \"testbigvalueisset\" \"nowisvalue\"";
 
-        // sdd(res.op_code);
-        free_parse(&res);
-        return 0;
-}
+//         struct parse_res res;
+//         alloc_parse(&res);
+//         parse(setcommand, strlen(setcommand), &res);
+
+//         // sdd(res.op_code);
+//         free_parse(&res);
+//         return 0;
+// }
