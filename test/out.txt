@@ -1,0 +1,40 @@
+[==========] Running 3 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from test_parse_complete_operand_set_FIRST
+[ RUN      ] test_parse_complete_operand_set_FIRST.string_equal
+[       OK ] test_parse_complete_operand_set_FIRST.string_equal (0 ms)
+[----------] 1 test from test_parse_complete_operand_set_FIRST (0 ms total)
+
+[----------] 1 test from test_parse_complete_operand_set_FIRST_ONLY
+[ RUN      ] test_parse_complete_operand_set_FIRST_ONLY.string_equal
+[       OK ] test_parse_complete_operand_set_FIRST_ONLY.string_equal (0 ms)
+[----------] 1 test from test_parse_complete_operand_set_FIRST_ONLY (0 ms total)
+
+[----------] 1 test from test_parse_overflow
+[ RUN      ] test_parse_overflow.len_equal
+[       OK ] test_parse_overflow.len_equal (2 ms)
+[----------] 1 test from test_parse_overflow (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 3 test suites ran. (3 ms total)
+[  PASSED  ] 3 tests.
+[==========] Running 3 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from test_parse_complete_operand_set_FIRST
+[ RUN      ] test_parse_complete_operand_set_FIRST.string_equal
+[       OK ] test_parse_complete_operand_set_FIRST.string_equal (0 ms)
+[----------] 1 test from test_parse_complete_operand_set_FIRST (0 ms total)
+
+[----------] 1 test from test_parse_complete_operand_set_FIRST_ONLY
+[ RUN      ] test_parse_complete_operand_set_FIRST_ONLY.string_equal
+[       OK ] test_parse_complete_operand_set_FIRST_ONLY.string_equal (0 ms)
+[----------] 1 test from test_parse_complete_operand_set_FIRST_ONLY (0 ms total)
+
+[----------] 1 test from test_parse_overflow
+[ RUN      ] test_parse_overflow.len_equal
+[       OK ] test_parse_overflow.len_equal (1 ms)
+[----------] 1 test from test_parse_overflow (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 3 test suites ran. (1 ms total)
+[  PASSED  ] 3 tests.

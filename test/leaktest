@@ -1,0 +1,23 @@
+==28375== LEAK SUMMARY:
+==28375==    definitely lost: 8 bytes in 1 blocks
+==28375==    indirectly lost: 0 bytes in 0 blocks
+==28375==      possibly lost: 16,832 bytes in 3 blocks
+==28375==    still reachable: 385,965 bytes in 959 blocks
+==28375==                       of which reachable via heuristic:
+==28375==                         newarray           : 312 bytes in 2 blocks
+==28375==         suppressed: 0 bytes in 0 blocks
+==28375== Rerun with --leak-check=full to see details of leaked memory
+
+
+---------
+no rw
+
+==28537== LEAK SUMMARY:
+==28537==    definitely lost: 8 bytes in 1 blocks
+==28537==    indirectly lost: 0 bytes in 0 blocks
+==28537==      possibly lost: 16,832 bytes in 3 blocks
+==28537==    still reachable: 385,965 bytes in 959 blocks
+==28537==                       of which reachable via heuristic:
+==28537==                         newarray           : 312 bytes in 2 blocks
+==28537==         suppressed: 0 bytes in 0 blocks
+==28537== Rerun with --leak-check=full to see details of leaked memory

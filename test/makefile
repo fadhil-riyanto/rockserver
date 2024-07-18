@@ -1,4 +1,4 @@
-ASAN =
+# ASAN = -fsanitize=address
 
 parse:
-	gcc parse.c -o p -Wall -ggdb3 ${ASAN}
+	g++ parse_test.cc -o p -Wall -ggdb3 -lgtest ${ASAN}
