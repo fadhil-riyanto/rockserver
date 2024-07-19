@@ -7,19 +7,10 @@ if ($fd === false) {
 
 $result = socket_connect($fd, '127.0.0.1', 8998);
 
-
-$payload = "abcde";
-$sendbuf = null;
-
-for($i = 0; $i < 10000; $i++) {
-        $sendbuf .= $payload;
-}
-
 /* test send endfile */
 $sendbuf = "abcpiabcpiabcpiabcpi";
 for($i = 0; $i < 100; $i++) {
         socket_send($fd, $sendbuf, strlen($sendbuf), 0);
-        sleep(10);
 }
 
 socket_close($fd);
