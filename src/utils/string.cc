@@ -1,5 +1,6 @@
 #include "string.h"
 #include <stdlib.h>
+#include <string.h>
 
 /* test/left_string.cc */
 void left_string(char* targetstr, int origin_length)
@@ -25,6 +26,7 @@ void left_string(char* targetstr, int origin_length)
 char* first_strnmv(char *src, int n)
 {       
         char *dest = (char*)malloc(sizeof(char) * (n + 1));
+        memset(dest, 0, sizeof(char) * (n + 1));
 
         int i = 0;
         for(; i < (n + 1); i++) {
