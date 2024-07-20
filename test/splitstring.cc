@@ -22,7 +22,7 @@ static const char DELIMITER[4] = {
         '\r', '\n', '\r', '\n'
 };
 
-static const char sample[20] = "abcde\r\n\r\ndefghi\r\n\r\n";
+static const char sample[20] = "abcdedefghiasdf";
 
 static int find_first_text_off(const char* data, int len)
 {
