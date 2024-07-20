@@ -38,14 +38,14 @@ static void __debug_str(char* target)
 int main()
 {
         char str[10] = {
-                '\0', '\0', 'h', 'e', 'y',
+                'h', 'e', 'y', '\0', '\0', 
                 '\0', '\0', '\0', '\0', '\0'
         };
 
         // printf("%s\n", str);
         __debug_str(str);
 
-        left_string(str, 2);
+        left_string(str, 0);
 
         __debug_str(str);
 
