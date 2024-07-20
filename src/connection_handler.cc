@@ -9,9 +9,11 @@
 #include "config.c"
 #include "../submodule/log.c-patched/src/log.h"
 #include "../header/threading.h"
+#include "utils/string.h"
+#include "utils/debugutils.h"
 
-
-#define length (sizeof(char) * 65535)
+#define char_length 65535
+#define length (sizeof(char) * char_length)
 
 static void setsignal_thread_free(server_state_t *server_state, 
                                             int thread_num)
@@ -37,8 +39,6 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
                 } else {
                         
                         *rbuf_len += ret;
-
-                        
                         
                         if (strcmp(rbuf, "exit\n") == 0) {
                                 return -2;
@@ -46,6 +46,14 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
                 }
         }
         return 0;
+}
+
+static void do_parse(char *rawstr, int cur_len)
+{
+        int ret = 0;
+        ret = find_first_text_off(rawstr, cur_len);
+        idd(ret);
+
 }
 
 void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
@@ -82,6 +90,8 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                         ret = recv_eventloop(child_epfd_event_len, data, &buflen, child_events,
                                                  thread_num);
 
+                        
+                        do_parse(data, buflen);
                         log_debug("thread %d says: %s", thread_num, 
                                                 data);
 
