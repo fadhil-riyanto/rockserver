@@ -14,6 +14,7 @@
 
 #define char_length 65535
 #define length (sizeof(char) * char_length)
+#define char_maxint_safety 2000
 
 static void setsignal_thread_free(server_state_t *server_state, 
                                             int thread_num)
@@ -33,7 +34,6 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
 
         for(int i = 0; i < evlen; i++) {
                 ret = recv(child_events[i].data.fd, buf, length, 0);
-                log_debug("ret %d", ret);
                 if (ret == 0 || ret == -1) {
                         return -2;
                 } else {
@@ -50,9 +50,24 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
 
 static void do_parse(char *rawstr, int cur_len)
 {
+        char *sanitized_buf;
         int ret = 0;
         ret = find_first_text_off(rawstr, cur_len);
-        idd(ret);
+        // idd(ret);
+        if (ret == -1) 
+                return;
+        else {
+                /* note: first_strmv return allocated address based on ret + 1, any char array larger
+                  than ret + 1 is unpredicted*/
+                idd(ret);
+                sanitized_buf = first_strnmv(rawstr, ret);
+                __debug_str(sanitized_buf, 30);
+                __debug_str(rawstr, 30);
+                
+        }
+        free(sanitized_buf);
+
+
 
 }
 
@@ -69,13 +84,11 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
         epoll_init(&child_epfd);
 
         char *data = (char*)malloc(length);
-        char *datatmp = (char*)malloc(length);
 
         if (data == NULL) {
                 perror("malloc failed");
         } else {
-                // memset(data, 0, length);
-                // memset(datatmp, 0, length);
+                memset(data, 0, length);
                 
                 log_info("handled fd %d", clientfd);
 
@@ -84,22 +97,17 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                 while (1) {
                         child_epfd_event_len = epoll_wait(child_epfd, child_events, 
                                                 CHILD_MAXEVENTS, 1000);
-
-
-                        log_debug("incmoming %d", child_epfd_event_len);
                         ret = recv_eventloop(child_epfd_event_len, data, &buflen, child_events,
                                                  thread_num);
-
-                        
-                        do_parse(data, buflen);
-                        log_debug("thread %d says: %s", thread_num, 
-                                                data);
 
                         if (*server_state->exit_now == 1 || ret == -2) {
                                 thread_ask_to_exit:
                                 log_info("thread exit");
                                 break;
                         }
+
+                        /* safe area */
+                        do_parse(data, buflen);
                 }
 
         }
@@ -107,6 +115,6 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
         setsignal_thread_free(server_state, thread_num);
 
         free(data);
-        free(datatmp);
+        // free(datatmp);
         close(child_epfd);
 }
