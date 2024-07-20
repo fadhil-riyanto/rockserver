@@ -93,7 +93,6 @@ static void handle_on_sock_req(int sockfd, struct threading_ctx *th, struct epol
         if (freethread == -1) {
                 thread_full(events[i].data.fd);
         } else {
-                printf("something happen\n");
                 handle_accept(sockfd, freethread);
         }
 }
