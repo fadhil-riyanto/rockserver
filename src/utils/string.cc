@@ -22,7 +22,7 @@ void left_string(char* targetstr, int origin_length)
 
 
 /* test file: test/mv_string.cc */
-static char* first_strnmv(char *src, int n)
+char* first_strnmv(char *src, int n)
 {       
         char *dest = (char*)malloc(sizeof(char) * (n + 1));
 
@@ -39,7 +39,7 @@ static char* first_strnmv(char *src, int n)
 
 
 /* test file: test/splitstring.cc */
-static int find_first_text_off(const char* data, int len)
+int find_first_text_off(const char* data, int len)
 {
         static const char DELIMITER[4] = {
                 '\r', '\n', '\r', '\n'
