@@ -38,7 +38,7 @@ static void __debug_str(char* target)
 int main()
 {
         char str[10] = {
-                'h', 'e', 'y', '\0', '\0', 
+                '\0', '\0', 'h', 'e', 'y', 
                 '\0', '\0', '\0', '\0', '\0'
         };
 
