@@ -26,10 +26,10 @@ void left_string(char* targetstr, int origin_length)
 
 
 /* test file: test/mv_string.cc */
-char* first_strnmv(char *src, int n)
+void first_strnmv(char *src, char *dest, int n)
 {       
-        char *dest = (char*)malloc(sizeof(char) * (n + 1));
-        memset(dest, 0, sizeof(char) * (n + 1));
+        // char *dest = (char*)malloc(sizeof(char) * (n + 1));
+        // memset(dest, 0, sizeof(char) * (n + 1));
 
         int i = 0;
         for(; i < (n + 1); i++) {
@@ -38,7 +38,7 @@ char* first_strnmv(char *src, int n)
         }
         *(dest + i) = '\0';
 
-        return dest;
+        // return dest;
         // idd(i);
 }
 

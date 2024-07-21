@@ -17,7 +17,7 @@
 
 #define char_length 65535
 #define length (sizeof(char) * char_length)
-#define char_maxint_safety 2000
+#define char_maxint_safety 4096
 
 static void setsignal_thread_free(server_state_t *server_state, 
                                             int thread_num)
@@ -53,13 +53,14 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
 
 static void do_parse(char *rawstr, int *cur_len)
 {
-        char *sanitized_buf;
+        char *sanitized_buf = (char*)malloc(sizeof(char) * char_length);
         int ret = 0;
         int orig_cur_len = *cur_len;
-        __debug_str(rawstr, 30);
-        // idd(*cur_len)
+        // __debug_str(rawstr, 30);
+        
         
         ret = find_first_text_off(rawstr, *cur_len);
+        idd(ret);
         // idd(ret);
         if (ret == -1) 
                 return;
@@ -67,7 +68,7 @@ static void do_parse(char *rawstr, int *cur_len)
                 /* note: first_strmv return allocated address based on ret + 1, any char array larger
                   than ret + 1 is unpredicted*/
                 // idd(ret);
-                sanitized_buf = first_strnmv(rawstr, ret);
+                first_strnmv(rawstr, sanitized_buf, ret);
                 // __debug_str(sanitized_buf, 30);
 
                 /* zero str start from current offset, 
@@ -81,7 +82,7 @@ static void do_parse(char *rawstr, int *cur_len)
                 left_string(rawstr, (ret + 1) + 4);
 
                 /* set current off */
-                __debug_str(rawstr, 30);
+                // __debug_str(rawstr, 30);
                 *cur_len = orig_cur_len - (ret + 1 + 4);
                
 
@@ -90,6 +91,7 @@ static void do_parse(char *rawstr, int *cur_len)
                 
         }
         free(sanitized_buf);
+        
 
 
 
