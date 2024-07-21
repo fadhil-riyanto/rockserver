@@ -1,6 +1,9 @@
+#define USE_DEBUG_FN
+
 #include "string.h"
 #include <stdlib.h>
 #include <string.h>
+#include "debugutils.h"
 
 /* test/left_string.cc */
 void left_string(char* targetstr, int origin_length)
@@ -56,4 +59,18 @@ int find_first_text_off(const char* data, int len)
                 
         }
         return -1;
+}
+
+/* test/remove_string.cc */
+
+void zerostr(char* src, int start, int length)
+{
+        length = start + length;
+        for(int i = 0; i <= (length - 1); i++) {
+                // idd(i);
+                if (i >= start && i <= (start + length)) {
+                        *(src + i) = '\0';
+                        // idd(i);
+                }
+        }
 }
