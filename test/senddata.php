@@ -14,8 +14,8 @@ $sendbuf = "asdf";
 // }
 
 socket_send($fd, $sendbuf, strlen($sendbuf), 0);
-sleep(3);
-$sendbuf = "gh\r\n\r\njk";
+sleep(5);
+$sendbuf = "ghjk";
 socket_send($fd, $sendbuf, strlen($sendbuf), 0);
 // off at 5
 

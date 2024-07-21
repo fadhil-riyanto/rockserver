@@ -45,7 +45,7 @@ int main()
         // printf("%s\n", str);
         __debug_str(str);
 
-        left_string(str, 0);
+        left_string(str, 2);
 
         __debug_str(str);
 
