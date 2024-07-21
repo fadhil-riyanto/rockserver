@@ -1,6 +1,9 @@
+#define USE_DEBUG_FN
+
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <regex.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
@@ -48,21 +51,42 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
         return 0;
 }
 
-static void do_parse(char *rawstr, int cur_len)
+static void do_parse(char *rawstr, int *cur_len)
 {
         char *sanitized_buf;
         int ret = 0;
-        ret = find_first_text_off(rawstr, cur_len);
+        int orig_cur_len = *cur_len;
+        __debug_str(rawstr, 30);
+        // idd(*cur_len)
+        
+        ret = find_first_text_off(rawstr, *cur_len);
         // idd(ret);
         if (ret == -1) 
                 return;
         else {
                 /* note: first_strmv return allocated address based on ret + 1, any char array larger
                   than ret + 1 is unpredicted*/
-                idd(ret);
+                // idd(ret);
                 sanitized_buf = first_strnmv(rawstr, ret);
-                __debug_str(sanitized_buf, 30);
+                // __debug_str(sanitized_buf, 30);
+
+                /* zero str start from current offset, 
+                  if array start from 0, so ret need to incremented again to 1 
+                  int 4 from sizeof \r\n\r\n which 4 byte long */
+                zerostr(rawstr, ret + 1, 4);
+
+                /* move left the gap string 
+                  ret + 1 because this is not array counting
+                  4 from sizeof the zeroed \r\n\r\n, which also need to move left */
+                left_string(rawstr, (ret + 1) + 4);
+
+                /* set current off */
                 __debug_str(rawstr, 30);
+                *cur_len = orig_cur_len - (ret + 1 + 4);
+               
+
+                
+                
                 
         }
         free(sanitized_buf);
@@ -107,7 +131,8 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                         }
 
                         /* safe area */
-                        do_parse(data, buflen);
+                        do_parse(data, &buflen);
+                        // idd(buflen);
                 }
 
         }
