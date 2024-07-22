@@ -60,10 +60,11 @@ static void do_parse(char *rawstr, int *cur_len)
 {
         char *sanitized_buf = (char*)malloc(sizeof(char) * char_length);
         int ret = 0;
-        int orig_cur_len = *cur_len;
-        __debug_str(rawstr, 30);
+        int orig_cur_len = 0;
+        
         
 do_extract:
+        orig_cur_len = *cur_len;
         ret = find_first_text_off(rawstr, *cur_len);
         // idd(ret);
         // idd(ret);
@@ -132,6 +133,8 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                                                 CHILD_MAXEVENTS, 1000);
                         ret = recv_eventloop(child_epfd_event_len, data, &buflen, child_events,
                                                  thread_num);
+
+                        __debug_str(data, 100);
 
                         if (*server_state->exit_now == 1 || ret == -2) {
                                 thread_ask_to_exit:
