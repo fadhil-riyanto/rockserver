@@ -66,6 +66,8 @@ static int __define_opcode(char *op_code_str, struct parse_res *res)
                 res->op_code = RCK_COMMAND_SET;
         } else if (strncmp(op_code_str, "get", OPCODE_LENGTH) == 0) {
                 res->op_code = RCK_COMMAND_GET;
+        } else if (strncmp(op_code_str, "del", OPCODE_LENGTH) == 0) {
+                res->op_code = RCK_COMMAND_DEL;
         } else {
                 return -1;
         }

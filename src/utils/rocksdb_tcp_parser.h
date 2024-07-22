@@ -1,9 +1,15 @@
 #ifndef ROCKSDB_TCP_PARSER
 #define ROCKSDB_TCP_PARSER
 
+#include <stdio.h>
+
+#define __debug_parser(opcode, op1, op2) printf("%d: \"%s\" => \"%s\"", opcode, op1, op2)
+
 enum rockserver_op {
         RCK_COMMAND_SET,
-        RCK_COMMAND_GET
+        RCK_COMMAND_GET,
+        RCK_COMMAND_DEL
+        
 };
 
 struct parse_res 
