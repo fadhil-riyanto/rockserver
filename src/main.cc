@@ -3,6 +3,7 @@
 
 #include "../header/connection_handler.h"
 #include "../header/rocksdb_ctx.h"
+#include <cstddef>
 #include <sys/epoll.h>
 #include "../header/epoll_watcher.h"
 #include <cstring>
@@ -100,11 +101,11 @@ static void handle_on_sock_req(int sockfd, struct threading_ctx *th, struct epol
 static void _main(struct config *pconfig)
 {
         // struct rocksdb_ctx rocksdb_ctx;
+        
         rocksdb::DB* db;
 
         rocksdb_setup(pconfig->db_path, db);
-        // server_state.rocksdb_ctx = &db;
-
+        server_state.db = db;
 
         struct epoll_event event, events[MAX_EVENTS];
         int epfd, event_counter;

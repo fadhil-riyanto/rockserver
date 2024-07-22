@@ -2,6 +2,7 @@
 #define SERVER_H
 
 #include <signal.h>
+#include "rocksdb/db.h"
 
 struct server_ctx {
         int *sockfd;
@@ -16,6 +17,8 @@ typedef struct server_state {
 
         void *threading_ch_ctx;
         struct rocksdb_ctx *rocksdb_ctx;
+
+        rocksdb::DB* db;
 
 } server_state_t;
 
