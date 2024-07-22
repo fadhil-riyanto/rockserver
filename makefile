@@ -43,10 +43,12 @@ inih_parser: src/inih_parser.c
 utils: ${UTILS_FILE}
 	g++ src/utils/req.cc -o ${OUTDIR}/utils-req.o ${CFLAGS} ${LIBCFLAGS}
 	g++ src/utils/string.cc -o ${OUTDIR}/utils-string.o ${CFLAGS} ${LIBCFLAGS}
+	g++ src/utils/rocksdb_tcp_parser.cc -o ${OUTDIR}/rocksdb_tcp_parser.o ${CFLAGS} ${LIBCFLAGS}
 
 all: threading config server conn epoll_watcher logc inih utils inih_parser
 	g++ src/main.cc ${OUTDIR}/config.o ${OUTDIR}/threading.o ${OUTDIR}/server.o \
 	${OUTDIR}/connection_handler.o ${OUTDIR}/epoll_watcher.o 		\
 	${OUTDIR}/logc.o ${OUTDIR}/utils-req.o ${OUTDIR}/utils-string.o		\
+	${OUTDIR}/rocksdb_tcp_parser.o 						\
 	${OUTDIR}/inih.o ${OUTDIR}/inih_parser.o				\
 	-o main ${CFLAGS} ${LINKERFLAGS}
