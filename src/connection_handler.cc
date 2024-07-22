@@ -14,6 +14,10 @@
 #include "../header/threading.h"
 #include "utils/string.h"
 #include "utils/debugutils.h"
+#include "../header/server.h"
+#include "../header/rocksdb_ctx.h"
+#include "rocksdb/options.h"
+#include "utils/rocksdb_tcp_parser.h"
 
 #define char_length 65535
 #define length (sizeof(char) * char_length)
@@ -51,12 +55,21 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
         return 0;
 }
 
-static void handleBufInput(char *src, int len)
+static void handleBufInput(char *src, int len, server_state_t *server_state)
 {
         log_debug("%s\n", src);
+        struct parse_res res;
+
+        alloc_parse(&res);
+        parse(src, len, &res);
+
+        idd(res.op_code);
+        
+        free_parse(&res);
+        // server_state->rocksdb_ctx->db->Put(WriteOptions(),)
 }
 
-static void do_parse(char *rawstr, int *cur_len)
+static void do_parse(char *rawstr, int *cur_len, server_state_t *server_state)
 {
         char *sanitized_buf = (char*)malloc(sizeof(char) * char_length);
         int ret = 0;
@@ -93,7 +106,7 @@ do_extract:
                 *cur_len = orig_cur_len - (ret + 1 + 4);
 
                 /* process our separated command */
-                handleBufInput(sanitized_buf, strlen(sanitized_buf));
+                handleBufInput(sanitized_buf, strlen(sanitized_buf), server_state);
 
                 if (ret != -1) 
                         goto do_extract;
@@ -143,7 +156,7 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                         }
 
                         /* safe area */
-                        do_parse(data, &buflen);
+                        do_parse(data, &buflen, server_state);
                         // idd(buflen);
                 }
 
