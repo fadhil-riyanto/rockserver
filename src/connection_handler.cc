@@ -63,7 +63,8 @@ static void handleBufInput(char *src, int len, server_state_t *server_state)
         alloc_parse(&res);
         parse(src, len, &res);
 
-        idd(res.op_code);
+        // idd();
+        __debug_parser(res.op_code, res.op1, res.op2);
         
         free_parse(&res);
         // server_state->rocksdb_ctx->db->Put(WriteOptions(),)
