@@ -18,7 +18,7 @@ typedef struct server_state {
         void *threading_ch_ctx;
         struct rocksdb_ctx *rocksdb_ctx;
 
-        rocksdb::DB* db;
+        rocksdb::DB *db;
 
 } server_state_t;
 

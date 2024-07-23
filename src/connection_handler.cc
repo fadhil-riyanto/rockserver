@@ -1,3 +1,4 @@
+#include <rocksdb/db.h>
 #define USE_DEBUG_FN
 
 #include <cstddef>
@@ -55,22 +56,54 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
         return 0;
 }
 
-static void handleBufInput(char *src, int len, server_state_t *server_state)
+static void handleBufInput(char *src, int len, server_state_t *server_state, int clientfd)
 {
-        log_debug("%s\n", src);
-        struct parse_res res;
+        // std::string value;
+        // rocksdb::DB *ctx = *server_state->db;
+        server_state->db->Put(rocksdb::WriteOptions(), "foo", "ok_bar");
 
-        alloc_parse(&res);
-        parse(src, len, &res);
+        //         send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
+        std::string value;
+        // get value
+        rocksdb::Status s = server_state->db->Get(rocksdb::ReadOptions(), "foo", &value);
 
-        // idd();
-        __debug_parser(res.op_code, res.op1, res.op2);
+        log_debug("req %s with result %s\n", src, value.c_str());
+
+        // char *err = NULL;
+        // rocksdb_writeoptions_t *writeoptions = rocksdb_writeoptions_create();
+        // const char key[] = "key";
+        // const char *value = "value";
+        // rocksdb_put(server_state->db, writeoptions, key, strlen(key), value, strlen(value) + 1,
+        //         &err);
+
+        // return;
+        // struct parse_res res;
+
+        // alloc_parse(&res);
+        // parse(src, len, &res);
+
+        // // idd();
+        // // __debug_parser(res.op_code, res.op1, res.op2);
+        // if (res.op_code == RCK_COMMAND_SET) {
+                
+        //         ctx->Put(rocksdb::WriteOptions(), "tes", "oke");
+        //         send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
+        // }
+                
+
+        // if (res.op_code == RCK_COMMAND_GET) {
+        //         ctx->Get(rocksdb::ReadOptions(), "tes", &value);
+        //         send(clientfd, value.c_str(), strlen(value.c_str()), MSG_DONTWAIT);
+        // }
+                
         
-        free_parse(&res);
+
+        
+        // free_parse(&res);
         // server_state->rocksdb_ctx->db->Put(WriteOptions(),)
 }
 
-static void do_parse(char *rawstr, int *cur_len, server_state_t *server_state)
+static void do_parse(char *rawstr, int *cur_len, server_state_t *server_state, int clientfd)
 {
         char *sanitized_buf = (char*)malloc(sizeof(char) * char_length);
         int ret = 0;
@@ -107,7 +140,7 @@ do_extract:
                 *cur_len = orig_cur_len - (ret + 1 + 4);
 
                 /* process our separated command */
-                handleBufInput(sanitized_buf, strlen(sanitized_buf), server_state);
+                handleBufInput(sanitized_buf, strlen(sanitized_buf), server_state, clientfd);
 
                 if (ret != -1) 
                         goto do_extract;
@@ -157,7 +190,7 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                         }
 
                         /* safe area */
-                        do_parse(data, &buflen, server_state);
+                        do_parse(data, &buflen, server_state, clientfd);
                         // idd(buflen);
                 }
 

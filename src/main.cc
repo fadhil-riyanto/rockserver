@@ -4,6 +4,7 @@
 #include "../header/connection_handler.h"
 #include "../header/rocksdb_ctx.h"
 #include <cstddef>
+#include <rocksdb/options.h>
 #include <sys/epoll.h>
 #include "../header/epoll_watcher.h"
 #include <cstring>
@@ -21,6 +22,9 @@
 #include "../submodule/inih/ini.h"
 #include "../header/inih_reader.h"
 #include "rocksdb/db.h"
+
+
+#define N_PROC sysconf(_SC_NPROCESSORS_ONLN)
 
 volatile sig_atomic_t exit_now = 0;
 struct threading_ctx th[MAX_CONN];
@@ -100,13 +104,6 @@ static void handle_on_sock_req(int sockfd, struct threading_ctx *th, struct epol
 
 static void _main(struct config *pconfig)
 {
-        // struct rocksdb_ctx rocksdb_ctx;
-        
-        rocksdb::DB* db;
-
-        rocksdb_setup(pconfig->db_path, db);
-        server_state.db = db;
-
         struct epoll_event event, events[MAX_EVENTS];
         int epfd, event_counter;
         int freethread = 0;
@@ -114,6 +111,20 @@ static void _main(struct config *pconfig)
         short ret;
         memset(&ret, 0, sizeof(ret));
         memset(&server_state, 0, sizeof(server_state_t));
+
+        rocksdb::DB *db;
+        rocksdb::Options options;
+        // Optimize RocksDB. This is the easiest way to get RocksDB to perform well
+        options.IncreaseParallelism();
+        options.OptimizeLevelStyleCompaction();
+        // create the DB if it's not already present
+        options.create_if_missing = true;
+
+        // open DB
+        rocksdb::Status s = rocksdb::DB::Open(options, pconfig->db_path, &db);
+        assert(s.ok());
+
+        server_state.db = db;
 
         serverstate_install_req_data(&exit_now, th);
 
@@ -168,6 +179,7 @@ static void _main(struct config *pconfig)
                 }
         }
         delete db;
+        // rocksdb_close(db);
 _main_ret:
     return;
 }
