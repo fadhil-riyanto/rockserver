@@ -107,9 +107,10 @@ do_extract:
         ret = find_first_text_off(rawstr, *cur_len);
         // idd(ret);
         // idd(ret);
-        if (ret == -1) 
+        if (ret == -1) {
+                free(sanitized_buf);
                 return;
-        else {
+        } else {
                 /* note: first_strmv return allocated address based on ret + 1, any char array larger
                   than ret + 1 is unpredicted*/
                 // idd(ret);
