@@ -58,16 +58,10 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
 
 static void handleBufInput(char *src, int len, server_state_t *server_state, int clientfd)
 {
-        // std::string value;
-        // rocksdb::DB *ctx = *server_state->db;
-        server_state->db->Put(rocksdb::WriteOptions(), "foo", "ok_bar");
+        
+        
 
-        //         send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
-        std::string value;
-        // get value
-        rocksdb::Status s = server_state->db->Get(rocksdb::ReadOptions(), "foo", &value);
-
-        log_debug("req %s with result %s\n", src, value.c_str());
+        log_debug("req %s\n", src);
 
         // char *err = NULL;
         // rocksdb_writeoptions_t *writeoptions = rocksdb_writeoptions_create();
@@ -77,30 +71,28 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         //         &err);
 
         // return;
-        // struct parse_res res;
+        struct parse_res res;
 
-        // alloc_parse(&res);
-        // parse(src, len, &res);
+        alloc_parse(&res);
+        parse(src, len, &res);
 
-        // // idd();
-        // // __debug_parser(res.op_code, res.op1, res.op2);
-        // if (res.op_code == RCK_COMMAND_SET) {
+        // idd();
+        // __debug_parser(res.op_code, res.op1, res.op2);
+        if (res.op_code == RCK_COMMAND_SET) {
                 
-        //         ctx->Put(rocksdb::WriteOptions(), "tes", "oke");
-        //         send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
-        // }
+                server_state->db->Put(rocksdb::WriteOptions(), res.op1, res.op2);
+                send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
+        }
                 
 
-        // if (res.op_code == RCK_COMMAND_GET) {
-        //         ctx->Get(rocksdb::ReadOptions(), "tes", &value);
-        //         send(clientfd, value.c_str(), strlen(value.c_str()), MSG_DONTWAIT);
-        // }
+        if (res.op_code == RCK_COMMAND_GET) {
+                std::string value;
+                rocksdb::Status s = server_state->db->Get(rocksdb::ReadOptions(), res.op1, &value);
                 
+                send(clientfd, value.c_str(), strlen(value.c_str()), MSG_DONTWAIT);
+        }
         
-
-        
-        // free_parse(&res);
-        // server_state->rocksdb_ctx->db->Put(WriteOptions(),)
+        free_parse(&res);
 }
 
 static void do_parse(char *rawstr, int *cur_len, server_state_t *server_state, int clientfd)
