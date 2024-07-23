@@ -1,0 +1,17 @@
+main 123: 0x5555555693f8
+0x5555555693f8
+
+0x5555555d9340
+gef➤  p *server_state.db
+$3 = (rocksdb::DB *) 0x5555555d9340
+
+$7 = (rocksdb::DB ***) 0x5555555693f8 <server_state+24>
+
+
+23 jul
+gef➤  p db
+$1 = (rocksdb_t *) 0x5555556132f0
+gef➤  p server_state.db
+$2 = (rocksdb_t **) 0x7fffffffe418
+gef➤  p *(server_state.db)
+$3 = (rocksdb_t *) 0x5555556132f0
