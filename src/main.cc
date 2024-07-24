@@ -112,6 +112,8 @@ static void _main(struct config *pconfig)
         memset(&ret, 0, sizeof(ret));
         memset(&server_state, 0, sizeof(server_state_t));
 
+        server_state.pconfig = pconfig;
+
         rocksdb::DB *db;
         rocksdb::Options options;
         // Optimize RocksDB. This is the easiest way to get RocksDB to perform well

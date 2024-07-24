@@ -7,6 +7,8 @@ struct config {
         int max_events;
         int child_maxevents;
         char *db_path;
+        int key_max_length;
+        int buffer_max_length;
 };
 
 int inih_cb(void* user, const char* section, const char* name,

@@ -19,6 +19,7 @@ typedef struct server_state {
         struct rocksdb_ctx *rocksdb_ctx;
 
         rocksdb::DB *db;
+        struct config *pconfig;
 
 } server_state_t;
 

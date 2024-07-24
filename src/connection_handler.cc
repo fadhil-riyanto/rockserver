@@ -19,10 +19,12 @@
 #include "../header/rocksdb_ctx.h"
 #include "rocksdb/options.h"
 #include "utils/rocksdb_tcp_parser.h"
+#include "../header/inih_reader.h"
 
 #define char_length 65535
 #define length (sizeof(char) * char_length)
-#define char_maxint_safety 4096
+#define real_char_length 
+#define char_maxint_safety 4096  /* possible deprecated */
 
 static void setsignal_thread_free(server_state_t *server_state, 
                                             int thread_num)
@@ -95,7 +97,10 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         free_parse(&res);
 }
 
-static void do_parse(char *rawstr, int *cur_len, server_state_t *server_state, int clientfd)
+/* return 
+  -1 : token not found, next read ... 
+*/
+static int do_parse(char *rawstr, int *cur_len, server_state_t *server_state, int clientfd)
 {
         char *sanitized_buf = (char*)malloc(sizeof(char) * char_length);
         int ret = 0;
@@ -109,7 +114,7 @@ do_extract:
         // idd(ret);
         if (ret == -1) {
                 free(sanitized_buf);
-                return;
+                return -1;
         } else {
                 /* note: first_strmv return allocated address based on ret + 1, any char array larger
                   than ret + 1 is unpredicted*/
@@ -140,9 +145,7 @@ do_extract:
         }
         free(sanitized_buf);
         
-
-
-
+        return 0;
 }
 
 void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
@@ -153,11 +156,19 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
         int child_epfd;
         int child_epfd_event_len;
         int buflen = 0;
+        
+        /* opcode space "key" space "buf"\r\n\r\n\0 */
+        int pconfig_total_length = 3 + 1 + 1 + server_state->pconfig->key_max_length + 1 + 1 + 1 +
+                                         server_state->pconfig->buffer_max_length + 1 + 4 + 3;
+        idd(pconfig_total_length);
+
         struct epoll_event child_event, child_events[CHILD_MAXEVENTS];
+        
 
         epoll_init(&child_epfd);
 
-        char *data = (char*)malloc(length);
+        /* alloc full length including termination chars */
+        char *data = (char*)malloc(pconfig_total_length);
 
         if (data == NULL) {
                 perror("malloc failed");
@@ -183,7 +194,7 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                         }
 
                         /* safe area */
-                        do_parse(data, &buflen, server_state, clientfd);
+                        // do_parse(data, &buflen, server_state, clientfd);
                         // idd(buflen);
                 }
 
