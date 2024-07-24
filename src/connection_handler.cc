@@ -22,7 +22,7 @@
 
 #define char_length 65535
 #define length (sizeof(char) * char_length)
-#define char_maxint_safety 4096
+#define char_maxint_safety (char_length - 4096)
 
 static void setsignal_thread_free(server_state_t *server_state, 
                                             int thread_num)
@@ -33,7 +33,10 @@ static void setsignal_thread_free(server_state_t *server_state,
         structdata[thread_num].need_join = 1;
 }
 
-static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_event *child_events, int thnum)
+/* return -3 on pass, -2 on exit */
+
+static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_event *child_events, int thnum,
+                                int avlen)
 {
         int ret = 0;
         char *buf;
@@ -41,7 +44,15 @@ static int recv_eventloop(int evlen, char* rbuf, int *rbuf_len, struct epoll_eve
         buf = &rbuf[*rbuf_len];
 
         for(int i = 0; i < evlen; i++) {
-                ret = recv(child_events[i].data.fd, buf, length, 0);
+
+                /* buffer will overflow here because the subtraction is less than zero  */
+                if (avlen < 0) {
+                        sdd("ev les than 0 caught")
+                        return -3;
+                }
+                        
+                ret = recv(child_events[i].data.fd, buf, avlen, 0);
+                // idd(avlen);
                 if (ret == 0 || ret == -1) {
                         return -2;
                 } else {
@@ -61,7 +72,7 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         
         
 
-        log_debug("req %s\n", src);
+        // log_debug("req %s\n", src);
 
         // char *err = NULL;
         // rocksdb_writeoptions_t *writeoptions = rocksdb_writeoptions_create();
@@ -81,7 +92,7 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         if (res.op_code == RCK_COMMAND_SET) {
                 
                 server_state->db->Put(rocksdb::WriteOptions(), res.op1, res.op2);
-                send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
+                // send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
         }
                 
 
@@ -172,9 +183,16 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                         child_epfd_event_len = epoll_wait(child_epfd, child_events, 
                                                 CHILD_MAXEVENTS, 1000);
                         ret = recv_eventloop(child_epfd_event_len, data, &buflen, child_events,
-                                                 thread_num);
+                                                 thread_num, (char_maxint_safety - buflen));
+                        // idd(ret);
+                        // if (ret == -3) {
+                        //         log_debug("danger batch send ENOMEM, start parsing..., av: %d ret %d", buflen, ret);
+                        //         do_parse(data, &buflen, server_state, clientfd);
+                        //         break;
+                        // }
+                                
 
-                        __debug_str(data, 100);
+                        // __debug_str(data, 100);
 
                         if (*server_state->exit_now == 1 || ret == -2) {
                                 thread_ask_to_exit:
