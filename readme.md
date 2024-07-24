@@ -2,8 +2,9 @@
 # introduction
 <a href="https://github.com/facebook/rocksdb">RocksDB</a> is an embedded database. This program is a server ported version using the RocksDB Facebook backend.
 
-# Warning
-pure valgrind output of facebook rocksdb: http://0x0.st/X9aR.txt
+# Warning / known bugs
+1. pure valgrind output of facebook rocksdb: http://0x0.st/X9aR.txt
+2. memory related error if trying to send batch query with length larger than 65535 char
 
 ## build
 1. get the source code
