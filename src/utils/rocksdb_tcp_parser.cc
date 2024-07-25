@@ -43,12 +43,16 @@ void alloc_parse(struct parse_res *res)
 
 void fixed_alloc_parse(struct parse_res *res, int op1size, int op2size)
 {
-        res->op1 = (char*)malloc(op1size);
-        res->op2 = (char*)malloc(op2size);
+        res->op1 = (char*)malloc(sizeof(char) * (op1size + 5));
+        memset(res->op1, 0, sizeof(char) * (op1size + 5));
+
+        res->op2 = (char*)malloc(sizeof(char) * (op2size + 5));
+        memset(res->op2, 0, sizeof(char) * (op2size + 5));
+
         res->tmp_opcode = (char*)malloc( sizeof(char) * (OPCODE_LENGTH + 1));
 
-        memset(res->op1, 0, sizeof(MAX_PAGESIZE * res->cur_multiplication1));
-        memset(res->op2, 0, sizeof(MAX_PAGESIZE * res->cur_multiplication2));
+        
+        
         
 }
 
