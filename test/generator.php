@@ -70,7 +70,7 @@ $tmpbuf = null;
 $gentest = new generate_test();
 for($i = 0; $i < 1; $i++) {
         // $tmpbuf = $tmpbuf . $gentest->generate_char_n("a", 20);
-        $gentest->send("set", $gentest->generate_char_n("a", 65535));
+        $gentest->send("set", $gentest->generate_char_n("a", 3000));
 }
 
 print(strlen($tmpbuf));
