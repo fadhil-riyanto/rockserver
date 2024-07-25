@@ -1,5 +1,6 @@
 #include <rocksdb/db.h>
 #define USE_DEBUG_FN
+#define USE_DEBUG_PRINT_LN
 
 #include <cstddef>
 #include <cstdlib>
@@ -25,6 +26,7 @@
 #define length (sizeof(char) * char_length)
 #define real_char_length 
 #define char_maxint_safety 4096  /* possible deprecated */
+int pconfig_total_length = 0;
 
 static void setsignal_thread_free(server_state_t *server_state, 
                                             int thread_num)
@@ -63,7 +65,7 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         
         
 
-        log_debug("req %s\n", src);
+        // log_debug("req %s\n", src);
 
         // char *err = NULL;
         // rocksdb_writeoptions_t *writeoptions = rocksdb_writeoptions_create();
@@ -75,7 +77,7 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         // return;
         struct parse_res res;
 
-        alloc_parse(&res);
+        fixed_alloc_parse(&res, server_state->pconfig->key_max_length, server_state->pconfig->buffer_max_length);
         parse(src, len, &res);
 
         // idd();
@@ -102,12 +104,15 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
 */
 static int do_parse(char *rawstr, int *cur_len, server_state_t *server_state, int clientfd)
 {
-        char *sanitized_buf = (char*)malloc(sizeof(char) * char_length);
+        char *sanitized_buf = (char*)malloc(sizeof(char) * pconfig_total_length);
+
         int ret = 0;
         int orig_cur_len = 0;
+        idd(pconfig_total_length);
         
         
 do_extract:
+        memset(sanitized_buf, 0, sizeof(char) * pconfig_total_length);
         orig_cur_len = *cur_len;
         ret = find_first_text_off(rawstr, *cur_len);
         // idd(ret);
@@ -120,12 +125,14 @@ do_extract:
                   than ret + 1 is unpredicted*/
                 // idd(ret);
 
+                __debug_str_ln(rawstr, 30);
                 first_strnmv(rawstr, sanitized_buf, ret);
-                // __debug_str(sanitized_buf, 30);
+                // __debug_str_ln(sanitized_buf, 30);
 
                 /* zero str start from current offset, 
                   if array start from 0, so ret need to incremented again to 1 
                   int 4 from sizeof \r\n\r\n which 4 byte long */
+                  __debug_str_ln(rawstr, 30);
                 zerostr(rawstr, ret + 1, 4);
 
                 /* move left the gap string 
@@ -134,7 +141,7 @@ do_extract:
                 left_string(rawstr, (ret + 1) + 4);
 
                 /* set current off */
-                // __debug_str(rawstr, 30);
+                __debug_str_ln(rawstr, 30);
                 *cur_len = orig_cur_len - (ret + 1 + 4);
 
                 /* process our separated command */
@@ -158,9 +165,9 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
         int buflen = 0;
         
         /* opcode space "key" space "buf"\r\n\r\n\0 */
-        int pconfig_total_length = 3 + 1 + 1 + server_state->pconfig->key_max_length + 1 + 1 + 1 +
+        pconfig_total_length = 3 + 1 + 1 + server_state->pconfig->key_max_length + 1 + 1 + 1 +
                                          server_state->pconfig->buffer_max_length + 1 + 4 + 3;
-        idd(pconfig_total_length);
+        iddln(pconfig_total_length);
 
         struct epoll_event child_event, child_events[CHILD_MAXEVENTS];
         
@@ -194,7 +201,7 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                         }
 
                         /* safe area */
-                        // do_parse(data, &buflen, server_state, clientfd);
+                        do_parse(data, &buflen, server_state, clientfd);
                         // idd(buflen);
                 }
 
