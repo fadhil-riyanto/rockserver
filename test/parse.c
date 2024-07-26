@@ -67,10 +67,10 @@ static inline __hot void __find_opcode(char* text, struct parse_res *res)
 {
         int i = 0;
         
-        for(;i < 3; i ++) {
+        for(;i < 3; i++) {
                 *(res->tmp_opcode + i) = *(text + i);
         }
-        *(res->tmp_opcode + (i + 1)) = *(text + i);
+        // *(res->tmp_opcode + (i + 1)) = '\0';
 }
 
 static int __define_opcode(char *op_code_str, struct parse_res *res)
