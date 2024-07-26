@@ -45,18 +45,14 @@ class generate_test {
 
         public function verify_data() : bool {
                 $buf = NULL;
-                socket_recv($this->fd, $buf, U_INT16_MAX, MSG_WAITALL);
+                socket_recv($this->fd, $buf, U_INT16_MAX, 0);
                 printf($buf);
         }
         public function send($opcode, $buf)
         {
                 /* generate random string that used as key, then return $this in order to verify the data */
-                $randstr = utils::openssl_genrandstr();
-                var_dump(
-                        ["generated" => $randstr]
-                
-                );
-                $formatted = sprintf("%s \"%s\" \"%s\"\r\n\r\n", $opcode, $randstr, $buf);
+             
+                $formatted = sprintf("%s%s\r\n\r\n", $opcode, $buf);
                 socket_send($this->fd, $formatted, strlen($formatted), 0);
                 // var_dump($formatted);
         }
@@ -68,9 +64,9 @@ class generate_test {
 $tmpbuf = null;
 
 $gentest = new generate_test();
-for($i = 0; $i < 1; $i++) {
+for($i = 0; $i < 6000; $i++) {
         // $tmpbuf = $tmpbuf . $gentest->generate_char_n("a", 20);
-        $gentest->send("set", $gentest->generate_char_n("a", 3000));
+        $gentest->send("set", $gentest->generate_char_n("a", 50));
 }
 
-print(strlen($tmpbuf));
+// print(strlen($tmpbuf));
