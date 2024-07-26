@@ -21,12 +21,15 @@
 #include "rocksdb/options.h"
 #include "utils/rocksdb_tcp_parser.h"
 #include "../header/inih_reader.h"
+#include "../header/connection_handler.h"
 
 #define char_length 65535
 #define length (sizeof(char) * char_length)
 #define real_char_length 
 #define char_maxint_safety 4096  /* possible deprecated */
 int pconfig_total_length = 0;
+
+struct state_data g_state_data;
 
 static void setsignal_thread_free(server_state_t *server_state, 
                                             int thread_num)
@@ -81,8 +84,43 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         get_opcode(opcode, src);
         get_value(value, src, len, 3);
 
-        printf("%s\n", opcode);
-        printf("%s\n", value);
+        if (strcmp(opcode, "set") == 0) {
+                g_state_data.opcode = OPCODE_SET;
+                g_state_data.complete = 0;
+        }
+
+        if (strcmp(opcode, "get") == 0) {
+                g_state_data.opcode = OPCODE_GET;
+                g_state_data.complete = 0;
+        }
+
+        if (strcmp(opcode, "op1") == 0) {
+                strcpy(g_state_data.op1, value);
+                g_state_data.complete = 0;
+        }
+
+        if (strcmp(opcode, "op2") == 0) {
+                strcpy(g_state_data.op2, value);
+                g_state_data.complete = 1;
+        }
+
+        if (g_state_data.complete == 1) {
+                if (g_state_data.opcode == OPCODE_SET) {
+                        server_state->db->Put(rocksdb::WriteOptions(), g_state_data.op1, g_state_data.op2);
+                }
+
+                if (g_state_data.opcode == OPCODE_GET) {
+                        std::string value;
+                        rocksdb::Status s = server_state->db->Get(rocksdb::ReadOptions(), g_state_data.op1, &value);
+                        
+                        send(clientfd, value.c_str(), strlen(value.c_str()), MSG_DONTWAIT);
+
+                }
+        }
+        
+        // printf("%s\n", opcode);
+        // printf("%s\n", value);
+
 
         free(opcode);
         free(value);
@@ -108,6 +146,7 @@ do_extract:
         // idd(ret);
         // idd(ret);
         if (ret == -1) {
+                // perror("test");
                 free(sanitized_buf);
                 return -1;
         } else {
@@ -147,11 +186,25 @@ do_extract:
 }
 
 
+void state_data_init(struct state_data *state_data, server_state_t *server_state) 
+{
+        state_data->op1 = (char*)malloc(server_state->pconfig->key_max_length);
+        state_data->op2 = (char*)malloc(server_state->pconfig->buffer_max_length);
+}
+
+void state_data_destroy(struct state_data *state_data) 
+{
+        free(state_data->op1);
+        free(state_data->op2);
+}
+
 
 
 void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
 
         log_debug("thread %d", thread_num);
+
+        state_data_init(&g_state_data, server_state);
         
         int ret = 0;
         int child_epfd;
@@ -204,6 +257,8 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
         }
         
         setsignal_thread_free(server_state, thread_num);
+
+        state_data_destroy(&g_state_data);
 
         free(data);
         // free(datatmp);
