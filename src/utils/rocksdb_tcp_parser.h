@@ -23,6 +23,7 @@ struct parse_res
 } __attribute__((__aligned__(32))) ; /* reserved first 32 bit align */
 
 void fixed_alloc_parse(struct parse_res *res, int op1size, int op2size);
+int fixed_alloc_parse_packed(int op1size, int op2size);
 void alloc_parse(struct parse_res *res);
 void free_parse(struct parse_res *res);
 int parse(char* text, int len_alloc, struct parse_res *res);

@@ -76,7 +76,7 @@ static void handle_accept(int sockfd, int freethread)
         if (acceptfd == -1) {
                 perror("accept");
         } else {
-                log_info("accepting ...");
+                log_info("accepting thnum %d...", freethread);
                 fill_thread(th, freethread, handle_conn, acceptfd, 
                                 &server_state, freethread);
         }

@@ -75,28 +75,28 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         //         &err);
 
         // return;
-        struct parse_res res;
+        struct parse_res* res = (struct parse_res*)malloc(fixed_alloc_parse_packed(server_state->pconfig->key_max_length, server_state->pconfig->buffer_max_length));
 
-        fixed_alloc_parse(&res, server_state->pconfig->key_max_length, server_state->pconfig->buffer_max_length);
-        parse(src, len, &res);
+        // fixed_alloc_parse(&res, server_state->pconfig->key_max_length, server_state->pconfig->buffer_max_length);
+        parse(src, len, res);
 
-        // idd();
-        // __debug_parser(res.op_code, res.op1, res.op2);
-        if (res.op_code == RCK_COMMAND_SET) {
+        // // idd();
+        // // __debug_parser(res.op_code, res.op1, res.op2);
+        // if (res.op_code == RCK_COMMAND_SET) {
                 
-                server_state->db->Put(rocksdb::WriteOptions(), res.op1, res.op2);
-                send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
-        }
+        //         server_state->db->Put(rocksdb::WriteOptions(), res.op1, res.op2);
+        //         send(clientfd, "ok\r\n\r\n", strlen("ok\r\n\r\n"), MSG_DONTWAIT);
+        // }
                 
 
-        if (res.op_code == RCK_COMMAND_GET) {
-                std::string value;
-                rocksdb::Status s = server_state->db->Get(rocksdb::ReadOptions(), res.op1, &value);
+        // if (res.op_code == RCK_COMMAND_GET) {
+        //         std::string value;
+        //         rocksdb::Status s = server_state->db->Get(rocksdb::ReadOptions(), res.op1, &value);
                 
-                send(clientfd, value.c_str(), strlen(value.c_str()), MSG_DONTWAIT);
-        }
+        //         send(clientfd, value.c_str(), strlen(value.c_str()), MSG_DONTWAIT);
+        // }
         
-        free_parse(&res);
+        free_parse(res);
 }
 
 /* return 
@@ -125,14 +125,14 @@ do_extract:
                   than ret + 1 is unpredicted*/
                 // idd(ret);
 
-                __debug_str_ln(rawstr, 30);
+
                 first_strnmv(rawstr, sanitized_buf, ret);
                 // __debug_str_ln(sanitized_buf, 30);
 
                 /* zero str start from current offset, 
                   if array start from 0, so ret need to incremented again to 1 
                   int 4 from sizeof \r\n\r\n which 4 byte long */
-                  __debug_str_ln(rawstr, 30);
+
                 zerostr(rawstr, ret + 1, 4);
 
                 /* move left the gap string 
@@ -141,10 +141,11 @@ do_extract:
                 left_string(rawstr, (ret + 1) + 4);
 
                 /* set current off */
-                __debug_str_ln(rawstr, 30);
+                
                 *cur_len = orig_cur_len - (ret + 1 + 4);
 
                 /* process our separated command */
+                __debug_str_ln(sanitized_buf, 30);
                 handleBufInput(sanitized_buf, strlen(sanitized_buf), server_state, clientfd);
 
                 if (ret != -1) 
@@ -167,7 +168,6 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
         /* opcode space "key" space "buf"\r\n\r\n\0 */
         pconfig_total_length = 3 + 1 + 1 + server_state->pconfig->key_max_length + 1 + 1 + 1 +
                                          server_state->pconfig->buffer_max_length + 1 + 4 + 3;
-        iddln(pconfig_total_length);
 
         struct epoll_event child_event, child_events[CHILD_MAXEVENTS];
         
@@ -191,8 +191,6 @@ void handle_conn(int clientfd, server_state_t *server_state, int thread_num) {
                                                 CHILD_MAXEVENTS, 1000);
                         ret = recv_eventloop(child_epfd_event_len, data, &buflen, child_events,
                                                  thread_num);
-
-                        __debug_str(data, 100);
 
                         if (*server_state->exit_now == 1 || ret == -2) {
                                 thread_ask_to_exit:

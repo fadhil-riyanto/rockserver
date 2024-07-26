@@ -50,10 +50,13 @@ void fixed_alloc_parse(struct parse_res *res, int op1size, int op2size)
         memset(res->op2, 0, sizeof(char) * (op2size + 5));
 
         res->tmp_opcode = (char*)malloc( sizeof(char) * (OPCODE_LENGTH + 1));
+}
 
-        
-        
-        
+
+int fixed_alloc_parse_packed(int op1size, int op2size)
+{
+        int all_len = (op1size + 1) + (op2size + 1) + (OPCODE_LENGTH + 1);
+        return all_len;
 }
 
 
@@ -73,7 +76,7 @@ static inline __hot void __find_opcode(char* text, struct parse_res *res)
         for(;i < 3; i ++) {
                 *(res->tmp_opcode + i) = *(text + i);
         }
-        *(res->tmp_opcode + (i + 1)) = *(text + i);
+        // *(res->tmp_opcode + (i + 1)) = *(text + i);
 }
 
 static int __define_opcode(char *op_code_str, struct parse_res *res)
