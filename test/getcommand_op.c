@@ -27,7 +27,7 @@ int main()
         char *opcode = (char*)malloc(sizeof(char) * 3);
         char *value = (char*)malloc(sizeof(char) * MAXBUF);
 
-        char* sample = "setabcASDDDDDDDDDDDDDDDDDDDDSDASDASAAAaaa";
+        char* sample = "set";
 
         get_opcode(opcode, sample);
         get_value(value, sample, strlen(sample));
