@@ -74,3 +74,25 @@ void zerostr(char* src, int start, int length)
                 }
         }
 }
+
+
+void get_opcode(char* target, char *src)
+{
+        int i = 0;
+        for(; i < 3; i++) {
+                *(target + i) = *(src + i);
+        }
+        *(target + (i )) = '\0';
+}
+
+void get_value(char* target, char *src, int n, int config_opcode_len)
+{
+        // printf("%s\n", src);
+        int i = config_opcode_len;
+        for(; i < config_opcode_len + n; i++) {
+                *(target + i - config_opcode_len) = *(src + i);
+                
+        }
+
+        *(target + i - config_opcode_len) = '\0';
+}
