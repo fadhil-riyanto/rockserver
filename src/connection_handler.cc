@@ -22,6 +22,9 @@
 #include "utils/rocksdb_tcp_parser.h"
 #include "../header/inih_reader.h"
 #include "../header/connection_handler.h"
+#include "./utils/signal.c"
+
+#define ROCKSERVER_SIGNAL
 
 #define char_length 65535
 #define length (sizeof(char) * char_length)
@@ -81,6 +84,8 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         char *opcode = (char*)malloc(sizeof(char) * 4);
         char *value = (char*)malloc(sizeof(char) * server_state->pconfig->buffer_max_length);
 
+        rocksdb::Status s;
+
         get_opcode(opcode, src);
         get_value(value, src, len, 3);
 
@@ -91,6 +96,11 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
 
         if (strcmp(opcode, "get") == 0) {
                 g_state_data.opcode = OPCODE_GET;
+                g_state_data.complete = 0;
+        }
+
+        if (strcmp(opcode, "del") == 0) {
+                g_state_data.opcode = OPCODE_DEL;
                 g_state_data.complete = 0;
         }
 
@@ -116,6 +126,15 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
                         send(clientfd, value.c_str(), strlen(value.c_str()), MSG_DONTWAIT);
                         send(clientfd, "\n", strlen("\n"), MSG_DONTWAIT);
 
+                }
+
+                if (g_state_data.opcode == OPCODE_DEL) {
+                        s = server_state->db->Delete(rocksdb::WriteOptions(), g_state_data.op1);
+                        if (s.ok()) {
+                                send(clientfd, SIGNAL_OK, strlen(SIGNAL_OK), MSG_DONTWAIT);
+                        } else {
+                                send(clientfd, SIGNAL_ERR, strlen(SIGNAL_ERR), MSG_DONTWAIT);
+                        }
                 }
         }
         
