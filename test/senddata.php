@@ -7,16 +7,7 @@ if ($fd === false) {
 
 $result = socket_connect($fd, '127.0.0.1', 8998);
 
-/* test send endfile */
-$sendbuf = "asdf";
-// for($i = 0; $i < 100; $i++) {
-//         socket_send($fd, $sendbuf, strlen($sendbuf), 0);
-// }
-
+$sendbuf = "set0\r\n\r\nop1abc\r\n\r\nop2ghijk\r\n\r\n";
 socket_send($fd, $sendbuf, strlen($sendbuf), 0);
-sleep(5);
-$sendbuf = "ghjk";
-socket_send($fd, $sendbuf, strlen($sendbuf), 0);
-// off at 5
 
 socket_close($fd);
