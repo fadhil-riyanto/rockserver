@@ -114,12 +114,13 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
                         rocksdb::Status s = server_state->db->Get(rocksdb::ReadOptions(), g_state_data.op1, &value);
                         
                         send(clientfd, value.c_str(), strlen(value.c_str()), MSG_DONTWAIT);
+                        send(clientfd, "\n", strlen("\n"), MSG_DONTWAIT);
 
                 }
         }
         
-        // printf("%s\n", opcode);
-        // printf("%s\n", value);
+        printf("%s\n", opcode);
+        printf("%s\n", value);
 
 
         free(opcode);
