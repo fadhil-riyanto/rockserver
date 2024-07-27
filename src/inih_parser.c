@@ -22,6 +22,8 @@ int inih_cb(void* user, const char* section, const char* name,
                 pconfig->key_max_length = atoi(value);
         } else if (MATCH("server", "buffer_max_length")) {
                 pconfig->buffer_max_length = atoi(value);
+        } else if (MATCH("server", "show_client_query")) {
+                pconfig->show_client_query = atoi(value);
         } else {
                 return 0;  /* unknown section/name, error */
         }

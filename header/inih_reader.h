@@ -9,6 +9,7 @@ struct config {
         char *db_path;
         int key_max_length;
         int buffer_max_length;
+        int show_client_query;
 };
 
 int inih_cb(void* user, const char* section, const char* name,

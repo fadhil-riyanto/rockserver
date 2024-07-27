@@ -115,6 +115,9 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
         }
 
         if (g_state_data.complete == 1) {
+                if (server_state->pconfig->show_client_query == 1) {
+                        log_info("executed \"%s\" : \"%s\" \"%s\"", opcode, g_state_data.op1, g_state_data.op2);
+                }
                 if (g_state_data.opcode == OPCODE_SET) {
                         server_state->db->Put(rocksdb::WriteOptions(), g_state_data.op1, g_state_data.op2);
                 }
@@ -138,10 +141,6 @@ static void handleBufInput(char *src, int len, server_state_t *server_state, int
                 }
         }
         
-        printf("%s\n", opcode);
-        printf("%s\n", value);
-
-
         free(opcode);
         free(value);
         
